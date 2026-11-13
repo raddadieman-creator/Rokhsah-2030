@@ -99,13 +99,24 @@
       return { id: id + "-" + i, text: r[0], opts, e: r[5] || "", ax };
     });
   }
-  async function serverBank(id) {
+  let vaultKey = null;
+  async function getKey() {
+    if (vaultKey) return vaultKey;
     const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 15000);
-    const r = await fetch(C.QUESTIONS_URL + "?action=bank&id=" + encodeURIComponent(id) + "&t=" + encodeURIComponent(window.TENANT || ""), { signal: ctl.signal });
+    const r = await fetch(C.QUESTIONS_URL + "?action=key&t=" + encodeURIComponent(window.TENANT || ""), { signal: ctl.signal });
     clearTimeout(t);
     const j = await r.json();
     if (!j.ok) { const e = new Error(j.reason || "denied"); e.denied = true; throw e; }
-    return j.items || [];
+    const raw = Uint8Array.from(atob(j.key), c => c.charCodeAt(0));
+    vaultKey = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+    return vaultKey;
+  }
+  async function serverBank(id) {
+    const key = await getKey();
+    const v = await (await fetch(BASE + "js/vault/" + id + ".json")).json();
+    const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(v.iv) }, key, b64(v.data));
+    return JSON.parse(new TextDecoder().decode(plain));
   }
   async function getQuestions(id) {
     const info = bankInfo(id);
