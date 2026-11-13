@@ -12,7 +12,7 @@ window.CONFIG = {
 
   // رابط خادم الأسئلة المركزي (تطبيق Apps Script الخاص بصاحبة المنتج). إذا وُضع تُجلب الأسئلة منه
   // بعد التحقق من اشتراك المنصة، وتُحذف ملفات js/banks من المستودع العام
-  QUESTIONS_URL: "",
+  QUESTIONS_URL: "https://script.google.com/macros/s/AKfycbxgdYToBhxWmjyMJ44uMUMomFqBWZ4flQDm4834B9jrj9RGX9ZDhDpuhZpNm7McCw4V/exec",
 
   // إعدادات الاختبارات المحاكية
   GENERAL_SIM_COUNT: 60,          // عدد أسئلة محاكاة التربوي العام (تُسحب عشوائيًا من البنك)
