@@ -1,7 +1,7 @@
 :root{
   --ink:#1C2A48; --ink-2:#2B3D63; --paper:#F5F6F1; --sheet:#FFFFFF;
   --graphite:#3D4250; --rule:#D9DCE3; --rule-2:#E9EBEF; --muted:#5F6675;
-  --mark:#E0A526; --mark-soft:#FBEFD0; --ok:#2F7A57; --ok-soft:#E3F1EA; --bad:#B4442F; --bad-soft:#F6E4DF;
+  --mark:#E0A526; --mark-soft:#FBEFD0; --mark-text:#6B4E0B; --ok:#2F7A57; --ok-soft:#E3F1EA; --bad:#B4442F; --bad-soft:#F6E4DF;
   --kufi:"Noto Kufi Arabic",system-ui,sans-serif; --naskh:"Noto Naskh Arabic",serif; --latin:"Source Serif 4",Georgia,serif;
   --r-s:6px; --r-m:10px;
 }
@@ -43,7 +43,7 @@ a.btn{text-decoration:none}
 .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
 .btn.ghost:hover{background:#fff}
 .btn.mark{background:var(--mark);color:var(--ink)}
-.btn.mark:hover{background:#D19818}
+.btn.mark:hover{filter:brightness(.94)}
 .btn.small{min-height:36px;padding:6px 14px;font-size:13.5px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 label.field{display:block;margin-bottom:16px}
@@ -67,6 +67,7 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .hero-side .ready .who{margin-bottom:8px}
 .hero-side .ready-row{padding:8px 0}
 .hero-side .ready-row .val{font-size:22px}
+.hero-org{font-size:15px;color:var(--muted);margin:-8px 0 14px;font-weight:500}
 .hero-sub{font-size:clamp(20px,3vw,26px);font-weight:700;margin:4px 0 14px;color:var(--ink-2)}
 .hero h1{font-size:clamp(28px,4.4vw,46px);line-height:1.35;font-weight:800;margin:0 0 14px;letter-spacing:-.3px}
 .hero p.lead{font-family:var(--naskh);font-size:19px;line-height:1.9;color:var(--graphite);margin:0 auto 24px;max-width:36em}
@@ -107,7 +108,7 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .spec-list button:hover{background:#fff}
 .spec-list b{font-size:15px;font-weight:700}
 .spec-list small{color:var(--muted);font-size:12.5px;white-space:nowrap}
-.spec-list .mine b::after{content:"تخصصي";font-size:11px;font-weight:700;background:var(--mark-soft);color:#7A5A0E;border-radius:20px;padding:1px 8px;margin-inline-start:8px}
+.spec-list .mine b::after{content:"تخصصي";font-size:11px;font-weight:700;background:var(--mark-soft);color:var(--mark-text);border-radius:20px;padding:1px 8px;margin-inline-start:8px}
 
 /* صفحات عامة */
 .panel{background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-m);padding:26px}
@@ -148,7 +149,7 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .explain b{font-family:var(--kufi);font-size:13.5px;display:block}
 .qnav{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
 .qnav .mid{display:flex;gap:10px}
-.flag[aria-pressed=true]{background:var(--mark-soft);border-color:#B98A17;color:#6B4E0B}
+.flag[aria-pressed=true]{background:var(--mark-soft);border-color:var(--mark);color:var(--mark-text)}
 .side{position:sticky;top:76px;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-m);padding:16px}
 .side h2{font-size:14px;margin:0 0 10px}
 .grid-nav{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;direction:rtl}
@@ -173,7 +174,7 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .result-head h1{margin:0 0 4px;font-size:22px}
 .result-head .band{display:inline-block;font-weight:700;font-size:14px;padding:3px 12px;border-radius:20px;margin:6px 0 8px}
 .band.b0{background:var(--bad-soft);color:var(--bad)}
-.band.b1{background:var(--mark-soft);color:#6B4E0B}
+.band.b1{background:var(--mark-soft);color:var(--mark-text)}
 .band.b2{background:#E4EAF5;color:var(--ink)}
 .band.b3{background:var(--ok-soft);color:var(--ok)}
 .result-head p{margin:0;font-size:14px;color:var(--muted)}

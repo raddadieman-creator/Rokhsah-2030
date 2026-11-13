@@ -13,7 +13,9 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* التخزين غير متاح */ } },
     del(k) { try { localStorage.removeItem(k); } catch (e) {} }
   };
-  const K = { user: "mhk_user", hist: "mhk_hist", live: "mhk_live" };
+  const NS = window.TENANT ? "mhk_" + window.TENANT + "_" : "mhk_";
+  const K = { user: NS + "user", hist: NS + "hist", live: NS + "live" };
+  const BASE = window.ASSET_BASE || "";
   let user = store.get(K.user, null);
 
   /* ---------- فهرس التخصصات ---------- */
@@ -30,7 +32,21 @@
   $("#brandOwner").textContent = C.OWNER_NAME;
   $("#footName").textContent = C.PLATFORM_NAME;
   $("#footOwner").textContent = C.OWNER_NAME;
-  if (C.LOGO_URL) { const im = $("#brandLogo"); im.src = C.LOGO_URL; im.hidden = false; $(".brand-mark").hidden = true; }
+  if (C.LOGO_URL) { const im = $("#brandLogo"); im.src = /^(https?:|data:)/.test(C.LOGO_URL) ? C.LOGO_URL : BASE + C.LOGO_URL; im.hidden = false; $(".brand-mark").hidden = true; }
+  if (C.ACCENT) {
+    const r = document.documentElement.style;
+    r.setProperty("--mark", C.ACCENT);
+    if (C.ACCENT_SOFT) r.setProperty("--mark-soft", C.ACCENT_SOFT);
+    if (C.ACCENT_TEXT) r.setProperty("--mark-text", C.ACCENT_TEXT);
+  }
+  if (C.ORG_NAME) { $("#footOwner").textContent = C.OWNER_NAME + " — " + C.ORG_NAME; }
+  if (C.BLOCKED) {
+    document.querySelector(".top-nav").hidden = true;
+    main.innerHTML = '<div class="panel empty" style="margin-top:40px"><h1 class="page-h">' +
+      (C.BLOCKED === "expired" ? "انتهى اشتراك هذه المنصة" : "المنصة غير موجودة") +
+      '</h1><p class="page-sub">' + (C.BLOCKED === "expired" ? "تواصل مع إدارة المنصة لتجديد الاشتراك." : "تحقق من الرابط.") + "</p></div>";
+    return;
+  }
   function refreshChip() {
     const chip = $("#userChip");
     chip.hidden = !user;
@@ -58,7 +74,7 @@
     if (loaded[file]) return loaded[file];
     loaded[file] = new Promise((res, rej) => {
       const s = document.createElement("script");
-      s.src = "js/banks/" + file + ".js"; s.onload = res; s.onerror = () => { delete loaded[file]; rej(new Error("load")); };
+      s.src = BASE + "js/banks/" + file + ".js"; s.onload = res; s.onerror = () => { delete loaded[file]; rej(new Error("load")); };
       document.head.appendChild(s);
     });
     return loaded[file];
@@ -83,10 +99,19 @@
       return { id: id + "-" + i, text: r[0], opts, e: r[5] || "", ax };
     });
   }
+  async function serverBank(id) {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 15000);
+    const r = await fetch(C.QUESTIONS_URL + "?action=bank&id=" + encodeURIComponent(id) + "&t=" + encodeURIComponent(window.TENANT || ""), { signal: ctl.signal });
+    clearTimeout(t);
+    const j = await r.json();
+    if (!j.ok) { const e = new Error(j.reason || "denied"); e.denied = true; throw e; }
+    return j.items || [];
+  }
   async function getQuestions(id) {
     const info = bankInfo(id);
-    await loadFile(info.file);
-    const base = (window.BANKS[id] || []);
+    let base;
+    if (C.QUESTIONS_URL) base = await serverBank(id);
+    else { await loadFile(info.file); base = window.BANKS[id] || []; }
     const extra = await fetchExtra(id);
     return normalize(id, base.concat(extra), info);
   }
@@ -140,6 +165,7 @@
     let html = '<section class="hero"><div class="hero-main">' +
       '<h1 class="hero-name">' + esc(C.PLATFORM_NAME) + "</h1>" +
       '<p class="hero-sub">تدرّب على اختبار الرخصة المهنية</p>' +
+      (C.ORG_NAME ? '<p class="hero-org">' + esc(C.ORG_NAME) + "</p>" : "") +
       '<p class="lead">محاكاة للاختبار التربوي العام واختبارات التخصص، بمؤقت وتنقل بين الأسئلة كما في قاعة الاختبار، ثم تحليل لدرجتك في كل معيار وتفسير لكل إجابة.</p>' +
       '<div class="hero-actions">' +
       (live ? '<button class="btn mark" data-go="exam">استكمال الاختبار المفتوح</button>' : "") +
@@ -212,7 +238,12 @@
     if (!info) return go("home");
     main.innerHTML = '<p class="loading">جارٍ تحميل الأسئلة…</p>';
     let qs;
-    try { qs = await getQuestions(id); } catch (e) { main.innerHTML = '<div class="empty">تعذّر تحميل الأسئلة. تحقق من الاتصال ثم أعد المحاولة.<br><button class="btn" data-go="setup/' + id + '">إعادة المحاولة</button></div>'; return; }
+    try { qs = await getQuestions(id); } catch (e) {
+      main.innerHTML = e.denied
+        ? '<div class="panel empty"><h1 class="page-h">الاشتراك غير مفعّل</h1><p class="page-sub">تواصل مع إدارة المنصة لتفعيل الاشتراك.</p></div>'
+        : '<div class="empty">تعذّر تحميل الأسئلة. تحقق من الاتصال ثم أعد المحاولة.<br><button class="btn" data-go="setup/' + id + '">إعادة المحاولة</button></div>';
+      return;
+    }
     const isGen = id === "gen";
     const simN = isGen ? Math.min(C.GENERAL_SIM_COUNT, qs.length) : qs.length;
     const mins = isGen ? C.GENERAL_SIM_MINUTES : C.SPEC_SIM_MINUTES;
