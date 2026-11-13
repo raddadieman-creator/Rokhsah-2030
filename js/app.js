@@ -184,9 +184,9 @@
     let html = '<section class="hero"><div class="hero-main">' +
       (C.LOGO_URL ? '<img class="hero-logo" src="' + esc(/^(https?:|data:)/.test(C.LOGO_URL) ? C.LOGO_URL : BASE + C.LOGO_URL) + '" alt="' + esc(C.ORG_NAME || "") + '">' : "") +
       '<h1 class="hero-name">' + esc(C.PLATFORM_NAME) + "</h1>" +
-      '<p class="hero-sub">منصة محاكاة اختبارات الرخصة المهنية للمعلمين</p>' +
+      '<p class="hero-sub">منصة اختبارات الرخصة المهنية للمعلمين</p>' +
       (C.ORG_NAME ? '<p class="hero-org">' + esc(C.ORG_NAME) + "</p>" : "") +
-      '<p class="lead">اختبارات محاكية للاختبار التربوي العام واختبارات التخصص، بزمن محدد وتنقل حر بين الأسئلة، يعقبها تقرير مفصل للأداء في كل معيار وتفسير علمي لكل إجابة.</p>' +
+      '<p class="lead">اختبارات تدريبية على نمط الاختبار التربوي العام واختبارات التخصص، بزمن محدد وتنقل حر بين الأسئلة، يعقبها تقرير مفصل للأداء في كل معيار وتفسير علمي لكل إجابة.</p>' +
       '<div class="hero-actions">' +
       (live ? '<button class="btn mark" data-go="exam">استكمال الاختبار المفتوح</button>' : "") +
       '<button class="btn" data-go="setup/gen">ابدأ التربوي العام</button>' +
@@ -200,8 +200,8 @@
       "</dl></section>" +
       '<aside class="ready" aria-label="بطاقة الجاهزية"><h2>بطاقة جاهزيتك</h2><p class="who">' +
       (user ? esc(user.name) + (mySpec ? " — " + esc(mySpec.name) : "") : "سجّل بياناتك لتظهر نتائجك هنا") + "</p>" +
-      readyRow("التربوي العام", "آخر محاكاة", g) +
-      readyRow(mySpec ? mySpec.name : "اختبار التخصص", mySpec ? "آخر محاكاة" : "لم يُحدَّد التخصص", s) +
+      readyRow("التربوي العام", "آخر اختبار", g) +
+      readyRow(mySpec ? mySpec.name : "اختبار التخصص", mySpec ? "آخر اختبار" : "لم يُحدَّد التخصص", s) +
       "</aside></div></section>";
 
     html += '<section class="general" style="margin-top:20px"><div><h3>' + esc(G.name) + '</h3><p style="margin:0 0 8px;opacity:.8;font-size:13.5px">يشترك فيه جميع المعلمين، ويغطي ثلاثة مجالات:</p><ul>' + G.domains.map(d => "<li>" + esc(d.name) + "</li>").join("") +
@@ -271,7 +271,7 @@
     main.innerHTML = '<div class="narrow" style="max-width:640px"><div class="panel">' +
       '<h1 class="page-h">' + esc(info.name) + '</h1><p class="page-sub">' + esc(info.stage) + " — في البنك " + toAr(qs.length) + " سؤالًا</p>" +
       '<form id="sf"><fieldset style="border:0;padding:0;margin:0"><legend class="muted" style="font-size:14px">طريقة الاختبار</legend><div class="mode-pick">' +
-      '<label><input type="radio" name="mode" value="sim" checked><b>محاكاة</b><small>' + toAr(simN) + " سؤالًا في " + toAr(mins) + " دقيقة، والنتيجة والتفسيرات في النهاية.</small></label>" +
+      '<label><input type="radio" name="mode" value="sim" checked><b>اختبار كامل</b><small>' + toAr(simN) + " سؤالًا في " + toAr(mins) + " دقيقة، والنتيجة والتفسيرات في النهاية.</small></label>" +
       '<label><input type="radio" name="mode" value="practice"><b>تدريب</b><small>دون وقت، وتظهر الإجابة الصحيحة وتفسيرها بعد كل سؤال.</small></label>' +
       "</div></fieldset>" +
       '<div id="practiceOpts" hidden><label class="field"><span>' + (isGen ? "المعيار" : "المحور") + '</span><select name="axis"><option value="all">الكل</option>' +
@@ -314,7 +314,7 @@
       const q = st.qs[st.cur], a = st.ans[st.cur], prac = st.mode === "practice";
       const locked = prac && a !== null;
       const info = bankInfo(st.bank);
-      main.innerHTML = '<div class="exam"><div class="exam-bar"><div><h1>' + esc(st.title) + "</h1><small>" + (prac ? "وضع التدريب" : "محاكاة") + " — أُجيب عن " + toAr(answered()) + " من " + toAr(st.qs.length) + "</small></div>" +
+      main.innerHTML = '<div class="exam"><div class="exam-bar"><div><h1>' + esc(st.title) + "</h1><small>" + (prac ? "وضع التدريب" : "اختبار كامل") + " — أُجيب عن " + toAr(answered()) + " من " + toAr(st.qs.length) + "</small></div>" +
         (st.endsAt ? '<div class="timer" id="timer" role="timer" aria-label="الوقت المتبقي"></div>' : "") + "</div>" +
         '<div><article class="qcard" dir="' + st.dir + '">' +
         '<div class="qmeta" dir="rtl"><span>السؤال ' + toAr(st.cur + 1) + " من " + toAr(st.qs.length) + "</span><span>" + esc(q.ax >= 0 ? info.axes[q.ax] : "سؤال مضاف") + "</span></div>" +
@@ -413,7 +413,7 @@
       action: "result", id: att.id, ts: new Date(att.ts).toISOString(),
       name: att.user && att.user.name, phone: (att.user && att.user.phone) || "",
       spec: att.user && (SPEC_INDEX[att.user.spec] || {}).name, stage: (att.user && att.user.stage) || "",
-      test: att.title, bank: att.bank, mode: att.mode === "sim" ? "محاكاة" : "تدريب",
+      test: att.title, bank: att.bank, mode: att.mode === "sim" ? "اختبار كامل" : "تدريب",
       total: att.total, correct: att.correct, pct: att.pct, answered: att.answered,
       minutes: Math.round(att.secs / 6) / 10, timeUp: att.timeUp,
       axes: att.axes.map(a => a.name + ": " + a.c + "/" + a.n).join(" | "),
@@ -453,7 +453,7 @@
     let html = '<section class="result-head"><div class="score-ring" style="--p:' + att.pct + ";--c:" + ringColor + '"><div><span><b>' + toAr(att.pct) + "٪</b><small>" + toAr(att.correct) + " من " + toAr(att.total) + "</small></span></div></div>" +
       "<div><h1>" + esc(att.title) + '</h1><span class="band b' + b.k + '">نطاق الدرجة: ' + b.t + "</span>" +
       "<p>في نظام الرخصة يُحدَّد المستوى بالدرجة الأدنى من الاختبارين مع المؤهل وسنوات الخبرة، والحد الأدنى ٥٠ في كلٍّ منهما. هذه درجة تدريبية لا تتنبأ بالدرجة الرسمية.</p>" +
-      '<div class="facts"><span>الطريقة: <b>' + (att.mode === "sim" ? "محاكاة" : "تدريب") + "</b></span><span>المدة: <b>" + toAr(mm) + ":" + toAr(String(ss).padStart(2, "0")) + "</b></span><span>دون إجابة: <b>" + toAr(att.total - att.answered) + "</b></span>" + (att.timeUp ? "<span><b>انتهى الوقت</b></span>" : "") + "</div>" +
+      '<div class="facts"><span>الطريقة: <b>' + (att.mode === "sim" ? "اختبار كامل" : "تدريب") + "</b></span><span>المدة: <b>" + toAr(mm) + ":" + toAr(String(ss).padStart(2, "0")) + "</b></span><span>دون إجابة: <b>" + toAr(att.total - att.answered) + "</b></span>" + (att.timeUp ? "<span><b>انتهى الوقت</b></span>" : "") + "</div>" +
       (C.SCRIPT_URL ? '<p id="sendState" class="send-state ' + (att.sent === true ? "ok" : att.sent === false ? "bad" : "") + '">' + (att.sent === true ? "أُرسلت النتيجة إلى فريق المنصة." : att.sent === false ? "تعذّر إرسال النتيجة، وستبقى محفوظة في السجل." : "جارٍ إرسال النتيجة…") + "</p>" : "") +
       "</div></section>";
     html += '<section class="breakdown"><h2>' + (att.bank === "gen" ? "الأداء في المعايير" : "الأداء في المحاور") + "</h2>" + bd +
@@ -486,7 +486,7 @@
     const h = store.get(K.hist, []);
     if (!h.length) { main.innerHTML = '<div class="panel empty"><p>لم تُجرِ أي اختبار بعد على هذا الجهاز.</p><button class="btn" data-go="setup/gen">ابدأ التربوي العام</button></div>'; return; }
     main.innerHTML = '<h1 class="page-h">السجل</h1><p class="page-sub">نتائجك المحفوظة على هذا الجهاز.</p><table class="hist"><thead><tr><th>الاختبار</th><th>الدرجة</th><th>الطريقة</th><th>التاريخ</th><th></th></tr></thead><tbody>' +
-      h.map(a => "<tr><td>" + esc(a.title) + '</td><td class="n">' + toAr(a.pct) + "٪</td><td>" + (a.mode === "sim" ? "محاكاة" : "تدريب") + "</td><td>" + new Date(a.ts).toLocaleDateString("ar-SA-u-ca-gregory-nu-arab", { day: "numeric", month: "short" }) + '</td><td><button class="btn ghost small" data-go="result/' + a.id + '">عرض</button></td></tr>').join("") + "</tbody></table>";
+      h.map(a => "<tr><td>" + esc(a.title) + '</td><td class="n">' + toAr(a.pct) + "٪</td><td>" + (a.mode === "sim" ? "اختبار كامل" : "تدريب") + "</td><td>" + new Date(a.ts).toLocaleDateString("ar-SA-u-ca-gregory-nu-arab", { day: "numeric", month: "short" }) + '</td><td><button class="btn ghost small" data-go="result/' + a.id + '">عرض</button></td></tr>').join("") + "</tbody></table>";
   }
 
   route();

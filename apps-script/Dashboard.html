@@ -81,7 +81,7 @@ a.wa{color:var(--ok);font-weight:700;text-decoration:none}
 <body>
 <header class="hero"><div class="wrap">
   <div class="hero-top">
-    <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div><h1>لوحة نتائج مِحَكّ</h1><p id="org">منصة محاكاة اختبارات الرخصة المهنية</p></div></div>
+    <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div><h1>لوحة نتائج مِحَكّ</h1><p id="org">منصة اختبارات الرخصة المهنية</p></div></div>
     <div class="hero-links"><a class="hl" id="sheetLink" href="#" target="_blank" rel="noopener">جدول البيانات</a><button class="hl" id="reloadTop">تحديث</button></div>
   </div>
   <p class="greet" id="greet"></p>
@@ -180,6 +180,8 @@ let RES=[],QS=[],open=null;
 const run=(fn,arg)=>new Promise((ok,no)=>{const r=google.script.run.withSuccessHandler(ok).withFailureHandler(no);arg===undefined?r[fn]():r[fn](arg);});
 const initials=n=>String(n||'؟').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join(' ');
 const pkey=r=>r.phone||r.name;
+const isFull=r=>r.mode!=='تدريب';
+const modeName=r=>isFull(r)?'اختبار كامل':'تدريب';
 const when=ts=>new Date(ts).toLocaleString('ar-SA-u-ca-gregory',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
@@ -190,7 +192,7 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
 run('getMeta').then(m=>{
   if(m.accent){document.documentElement.style.setProperty('--accent',m.accent);document.documentElement.style.setProperty('--accent-soft',m.accent+'38');}
   if(m.org)document.getElementById('org').textContent=m.org;
-  document.getElementById('greet').innerHTML=(m.owner?'<b>'+esc(m.owner)+'</b>':'')+'متابعة أداء المتدربين في الاختبارات المحاكية';
+  document.getElementById('greet').innerHTML=(m.owner?'<b>'+esc(m.owner)+'</b>':'')+'متابعة أداء المتدربين في اختبارات الرخصة المهنية';
   document.getElementById('sheetLink').href=m.url;
 }).catch(()=>{});
 document.getElementById('reloadTop').onclick=()=>{document.getElementById('overview').innerHTML='<p class="loading">جارٍ التحديث…</p>';load();};
@@ -208,24 +210,24 @@ function barRow(name,p){return '<div class="brow"><span>'+esc(name)+'</span><div
 function drawOverview(){
   const el=document.getElementById('overview');
   if(!RES.length){el.innerHTML='<div class="card empty">لم تصل أي نتيجة بعد. حين ينهي متدرب اختبارًا في المنصة تظهر نتيجته هنا.</div>';return;}
-  const sims=RES.filter(r=>r.mode==='محاكاة');
+  const sims=RES.filter(isFull);
   const people=new Set(RES.map(pkey)).size;
   const avg=sims.length?Math.round(sims.reduce((a,r)=>a+Number(r.pct),0)/sims.length):0;
   const pass=sims.length?Math.round(sims.filter(r=>r.pct>=50).length/sims.length*100):0;
   const week=RES.filter(r=>r.ts>Date.now()-7*864e5).length;
-  let h='<div class="kpis">'+[[ar(people),'المتدربون','سجّلوا في المنصة'],[ar(RES.length),'المحاولات','منها '+ar(sims.length)+' محاكاة'],[ar(avg)+'٪','متوسط المحاكاة','لجميع الاختبارات'],[ar(pass)+'٪','بلغوا ٥٠ فأكثر','في المحاكاة']].map(k=>'<div class="kpi"><span>'+k[1]+'</span><b>'+k[0]+'</b><small>'+k[2]+'</small></div>').join('')+'</div>';
+  let h='<div class="kpis">'+[[ar(people),'المتدربون','سجّلوا في المنصة'],[ar(RES.length),'المحاولات','منها '+ar(sims.length)+' اختبارًا كاملًا'],[ar(avg)+'٪','متوسط الدرجات','لجميع الاختبارات'],[ar(pass)+'٪','بلغوا ٥٠ فأكثر','في الاختبارات الكاملة']].map(k=>'<div class="kpi"><span>'+k[1]+'</span><b>'+k[0]+'</b><small>'+k[2]+'</small></div>').join('')+'</div>';
   const days=[...Array(14)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-13+i);return d;});
   const counts=days.map(d=>RES.filter(r=>r.ts>=d.getTime()&&r.ts<d.getTime()+864e5).length);const mx=Math.max(1,...counts);
   const spark='<div class="spark">'+days.map((d,i)=>'<div title="'+ar(counts[i])+'"><i class="'+(i===13?'today':'')+'" style="height:'+(counts[i]/mx*100)+'%"></i><small>'+ar(d.getDate())+'</small></div>').join('')+'</div>';
   const cnt=[0,0,0,0];sims.forEach(r=>cnt[band(r.pct)]++);const m2=Math.max(1,...cnt);
   const dist=cnt.map((c,i)=>'<div class="brow"><span>'+BAND_NAMES[i]+'</span><div class="bbar"><i style="width:'+(c/m2*100)+'%;background:'+BAND_COLORS[i]+'"></i></div><b>'+ar(c)+'</b></div>').join('');
-  h+='<div class="grid2"><div class="card"><h2>النشاط</h2><p class="sub">عدد المحاولات في آخر ١٤ يومًا، منها '+ar(week)+' هذا الأسبوع</p>'+spark+'</div><div class="card"><h2>توزيع درجات المحاكاة</h2><p class="sub">بحسب نطاقات الرخصة المهنية</p>'+dist+'</div></div>';
+  h+='<div class="grid2"><div class="card"><h2>النشاط</h2><p class="sub">عدد المحاولات في آخر ١٤ يومًا، منها '+ar(week)+' هذا الأسبوع</p>'+spark+'</div><div class="card"><h2>توزيع الدرجات</h2><p class="sub">بحسب نطاقات الرخصة المهنية</p>'+dist+'</div></div>';
   const gen=axesAgg(sims.filter(r=>r.bank==='gen')).sort((a,b)=>a.p-b.p);
   const byTest={};sims.forEach(r=>{(byTest[r.test]=byTest[r.test]||[]).push(Number(r.pct));});
   const tests=Object.entries(byTest).map(([t,a])=>({t,avg:Math.round(a.reduce((x,y)=>x+y,0)/a.length),n:a.length})).sort((a,b)=>b.n-a.n).slice(0,8);
-  h+='<div class="grid2"><div class="card"><h2>الأداء في معايير التربوي العام</h2><p class="sub">نسبة الإجابات الصحيحة لكل معيار، الأضعف أولًا</p>'+(gen.length?gen.map(g=>barRow(g.name,g.p)).join(''):'<p class="muted">لا توجد محاكاة للتربوي العام بعد.</p>')+'</div>'+
-     '<div class="card"><h2>متوسط كل اختبار</h2><p class="sub">في المحاكاة، مرتبة بعدد المحاولات</p>'+(tests.length?tests.map(t=>barRow(t.t+' ('+ar(t.n)+')',t.avg)).join(''):'<p class="muted">لا توجد بيانات.</p>')+'</div></div>';
-  h+='<div class="card" style="padding:0"><div style="padding:16px 20px 6px"><h2>آخر النتائج</h2></div><div class="tbl-wrap" style="border:0;border-radius:0 0 14px 14px"><table><tbody>'+RES.slice(0,6).map(r=>'<tr><td><div class="who"><span class="av">'+esc(initials(r.name))+'</span><div>'+esc(r.name)+'<small>'+esc([r.stage,r.spec].filter(Boolean).join(' — '))+'</small></div></div></td><td>'+esc(r.test)+' <span class="tag">'+esc(r.mode)+'</span></td><td class="n"><span class="pill p'+band(r.pct)+'">'+ar(r.pct)+'٪</span></td><td class="muted">'+when(r.ts)+'</td></tr>').join('')+'</tbody></table></div></div>';
+  h+='<div class="grid2"><div class="card"><h2>الأداء في معايير التربوي العام</h2><p class="sub">نسبة الإجابات الصحيحة لكل معيار، الأضعف أولًا</p>'+(gen.length?gen.map(g=>barRow(g.name,g.p)).join(''):'<p class="muted">لا توجد اختبارات كاملة في التربوي العام بعد.</p>')+'</div>'+
+     '<div class="card"><h2>متوسط كل اختبار</h2><p class="sub">في الاختبارات الكاملة، مرتبة بعدد المحاولات</p>'+(tests.length?tests.map(t=>barRow(t.t+' ('+ar(t.n)+')',t.avg)).join(''):'<p class="muted">لا توجد بيانات.</p>')+'</div></div>';
+  h+='<div class="card" style="padding:0"><div style="padding:16px 20px 6px"><h2>آخر النتائج</h2></div><div class="tbl-wrap" style="border:0;border-radius:0 0 14px 14px"><table><tbody>'+RES.slice(0,6).map(r=>'<tr><td><div class="who"><span class="av">'+esc(initials(r.name))+'</span><div>'+esc(r.name)+'<small>'+esc([r.stage,r.spec].filter(Boolean).join(' — '))+'</small></div></div></td><td>'+esc(r.test)+' <span class="tag">'+esc(modeName(r))+'</span></td><td class="n"><span class="pill p'+band(r.pct)+'">'+ar(r.pct)+'٪</span></td><td class="muted">'+when(r.ts)+'</td></tr>').join('')+'</tbody></table></div></div>';
   el.innerHTML=h;
 }
 
@@ -233,7 +235,7 @@ function drawOverview(){
 function filtered(){
   const f=id=>(document.getElementById(id)||{}).value||'';
   const t=f('fTest'),m=f('fMode'),s=f('fSpec'),st=f('fStage'),q=f('fQ').trim(),d=f('fFrom');
-  return RES.filter(r=>(!t||r.bank===t)&&(!m||r.mode===m)&&(!s||r.spec===s)&&(!st||r.stage===st)&&(!q||String(r.name).includes(q)||String(r.phone).includes(q))&&(!d||r.ts>=new Date(d).getTime()));
+  return RES.filter(r=>(!t||r.bank===t)&&(!m||modeName(r)===m)&&(!s||r.spec===s)&&(!st||r.stage===st)&&(!q||String(r.name).includes(q)||String(r.phone).includes(q))&&(!d||r.ts>=new Date(d).getTime()));
 }
 function drawResults(){
   const el=document.getElementById('results');
@@ -241,7 +243,7 @@ function drawResults(){
   const specs=[...new Set(RES.map(r=>r.spec).filter(Boolean))].sort();
   const tests=[...new Set(RES.map(r=>r.bank))];
   el.innerHTML='<div class="filters"><label>الاختبار<select id="fTest"><option value="">الكل</option>'+tests.map(b=>'<option value="'+esc(b)+'">'+esc((BANK[b]||{}).name||b)+'</option>').join('')+'</select></label>'+
-   '<label>الطريقة<select id="fMode"><option value="">الكل</option><option>محاكاة</option><option>تدريب</option></select></label>'+
+   '<label>الطريقة<select id="fMode"><option value="">الكل</option><option>اختبار كامل</option><option>تدريب</option></select></label>'+
    '<label>المرحلة<select id="fStage"><option value="">الكل</option><option>ابتدائي</option><option>متوسط</option><option>ثانوي</option></select></label>'+
    '<label>تخصص المتدرب<select id="fSpec"><option value="">الكل</option>'+specs.map(s=>'<option>'+esc(s)+'</option>').join('')+'</select></label>'+
    '<label>بحث بالاسم<input id="fQ" type="search"></label><label>من تاريخ<input id="fFrom" type="date"></label>'+
@@ -253,7 +255,7 @@ function drawResults(){
 }
 function paint(){
   const rows=filtered();
-  document.getElementById('rows').innerHTML=rows.map(r=>'<tr><td><div class="who"><span class="av">'+esc(initials(r.name))+'</span><div>'+esc(r.name)+'<small>'+esc([r.stage,r.spec].filter(Boolean).join(' — '))+'</small></div></div></td><td>'+esc(r.test)+' <span class="tag">'+esc(r.mode)+'</span></td><td class="n"><span class="pill p'+band(r.pct)+'">'+ar(r.pct)+'٪</span></td><td class="n">'+ar(r.correct)+' / '+ar(r.total)+'</td><td>'+ar(r.minutes)+' د</td><td class="muted">'+when(r.ts)+'</td><td><button class="btn ghost sm" data-d="'+esc(r.id)+'">'+(open===r.id?'إخفاء':'تفاصيل')+'</button></td></tr>'+
+  document.getElementById('rows').innerHTML=rows.map(r=>'<tr><td><div class="who"><span class="av">'+esc(initials(r.name))+'</span><div>'+esc(r.name)+'<small>'+esc([r.stage,r.spec].filter(Boolean).join(' — '))+'</small></div></div></td><td>'+esc(r.test)+' <span class="tag">'+esc(modeName(r))+'</span></td><td class="n"><span class="pill p'+band(r.pct)+'">'+ar(r.pct)+'٪</span></td><td class="n">'+ar(r.correct)+' / '+ar(r.total)+'</td><td>'+ar(r.minutes)+' د</td><td class="muted">'+when(r.ts)+'</td><td><button class="btn ghost sm" data-d="'+esc(r.id)+'">'+(open===r.id?'إخفاء':'تفاصيل')+'</button></td></tr>'+
     (open===r.id?'<tr class="detail"><td colspan="7"><b>الأداء في المحاور:</b> '+esc(r.axes)+'<br><b>أرقام الأسئلة الخاطئة أو غير المُجابة:</b> '+(esc(r.wrong)||'لا يوجد')+'<br><b>انتهى الوقت:</b> '+esc(r.timeUp)+' — <b>المُجاب:</b> '+ar(r.answered)+' من '+ar(r.total)+' <button class="btn ghost sm" data-del="'+esc(r.id)+'" style="margin-inline-start:10px">حذف هذه النتيجة</button></td></tr>':'')).join('')||'<tr><td colspan="7" class="empty">لا توجد نتائج تطابق التصفية.</td></tr>';
   document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{open=open===b.dataset.d?null:b.dataset.d;paint();});
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(!confirm('حذف النتيجة نهائيًا من الجدول؟'))return;run('deleteResult',b.dataset.del).then(r=>{RES=r.sort((a,b)=>b.ts-a.ts);open=null;paint();drawOverview();});});
@@ -271,7 +273,7 @@ function drawPeople(){
   const el=document.getElementById('people');
   if(!RES.length){el.innerHTML='<div class="card empty">لا يوجد متدربون بعد.</div>';return;}
   const by={};RES.forEach(r=>{(by[pkey(r)]=by[pkey(r)]||[]).push(r);});
-  const list=Object.values(by).map(a=>{const sims=a.filter(r=>r.mode==='محاكاة');const g=sims.filter(r=>r.bank==='gen'),s=sims.filter(r=>r.bank!=='gen');
+  const list=Object.values(by).map(a=>{const sims=a.filter(isFull);const g=sims.filter(r=>r.bank==='gen'),s=sims.filter(r=>r.bank!=='gen');
     return {name:a[0].name,stage:a[0].stage||'',phone:a[0].phone,spec:a[0].spec||(a.find(r=>r.bank!=='gen')||{}).test||'',n:a.length,last:a[0].ts,g:g.length?Math.max(...g.map(r=>r.pct)):null,s:s.length?Math.max(...s.map(r=>r.pct)):null};}).sort((a,b)=>b.last-a.last);
   const wa=p=>{const d=String(p).replace(/\D/g,'');return d.startsWith('05')?'966'+d.slice(1):d;};
   const cell=v=>v==null?'<span class="muted">—</span>':'<span class="pill p'+band(v)+'">'+ar(v)+'٪</span>';

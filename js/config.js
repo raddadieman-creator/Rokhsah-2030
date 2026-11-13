@@ -2,7 +2,7 @@
 window.CONFIG = {
   // اسم المنصة واسم صاحبتها (مؤقت إلى أن يصل الاسم النهائي)
   PLATFORM_NAME: "مِحَكّ",
-  PLATFORM_TAGLINE: "محاكاة اختبارات الرخصة المهنية للمعلمين",
+  PLATFORM_TAGLINE: "اختبارات الرخصة المهنية للمعلمين",
   OWNER_NAME: "أ. اسم صاحبة المنصة",
   OWNER_CONTACT: "",              // رابط واتساب أو حساب تواصل (اختياري)
   LOGO_URL: "",                   // مسار الشعار، مثل assets/logo.png (اختياري)
@@ -14,8 +14,8 @@ window.CONFIG = {
   // بعد التحقق من اشتراك المنصة، وتُحذف ملفات js/banks من المستودع العام
   QUESTIONS_URL: "https://script.google.com/macros/s/AKfycbxgdYToBhxWmjyMJ44uMUMomFqBWZ4flQDm4834B9jrj9RGX9ZDhDpuhZpNm7McCw4V/exec",
 
-  // إعدادات الاختبارات المحاكية
-  GENERAL_SIM_COUNT: 60,          // عدد أسئلة محاكاة التربوي العام (تُسحب عشوائيًا من البنك)
+  // إعدادات الاختبارات الكاملة
+  GENERAL_SIM_COUNT: 60,          // عدد أسئلة الاختبار الكامل للتربوي العام (تُسحب عشوائيًا من البنك)
   GENERAL_SIM_MINUTES: 90,
-  SPEC_SIM_MINUTES: 30            // مدة محاكاة كل تخصص (عدد الأسئلة = كامل بنك التخصص)
+  SPEC_SIM_MINUTES: 30            // مدة الاختبار الكامل لكل تخصص (عدد الأسئلة = كامل بنك التخصص)
 };
