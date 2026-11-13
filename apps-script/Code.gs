@@ -7,6 +7,10 @@
  *  2) نشر «لوحة»: التنفيذ بصفتي، والوصول: أنا فقط         ← رابط اللوحة الخاصة
  */
 
+// معرّف جدول النتائج (من رابطه بين /d/ و /edit). يُترك فارغًا إذا كان السكربت مرتبطًا بالجدول نفسه
+const SHEET_ID = '';
+function ss_() { return SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
+
 const SHEET_RESULTS = 'النتائج';
 const SHEET_QUESTIONS = 'أسئلة_إضافية';
 const RESULT_HEADERS = ['التاريخ', 'المعرّف', 'الاسم', 'الجوال', 'المرحلة', 'التخصص', 'الاختبار', 'رمز البنك', 'الطريقة',
@@ -24,7 +28,7 @@ function setup() {
   sheet_(SHEET_QUESTIONS, QUESTION_HEADERS);
 }
 function sheet_(name, headers) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = ss_();
   let sh = ss.getSheetByName(name);
   if (!sh) sh = ss.insertSheet(name);
   if (sh.getLastRow() === 0) {
@@ -80,7 +84,7 @@ function doGet(e) {
   return json_({ ok: true, service: 'rukhsa' });
 }
 function questionsFor_(bank) {
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_QUESTIONS);
+  const sh = ss_().getSheetByName(SHEET_QUESTIONS);
   if (!sh || sh.getLastRow() < 2) return [];
   return sh.getRange(2, 1, sh.getLastRow() - 1, QUESTION_HEADERS.length).getValues()
     .filter(r => String(r[1]) === String(bank) && r[9] !== 'لا' && r[2] && r[3])
@@ -90,7 +94,7 @@ function questionsFor_(bank) {
 /* ---------- دوال اللوحة (لصاحبة المنصة فقط) ---------- */
 function getResults() {
   guard_();
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_RESULTS);
+  const sh = ss_().getSheetByName(SHEET_RESULTS);
   if (!sh || sh.getLastRow() < 2) return [];
   return sh.getRange(2, 1, sh.getLastRow() - 1, RESULT_HEADERS.length).getValues().map(r => ({
     ts: r[0] instanceof Date ? r[0].getTime() : new Date(r[0]).getTime(), id: r[1], name: r[2], phone: String(r[3]).replace(/^'/, ''),
@@ -100,7 +104,7 @@ function getResults() {
 }
 function getQuestions() {
   guard_();
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_QUESTIONS);
+  const sh = ss_().getSheetByName(SHEET_QUESTIONS);
   if (!sh || sh.getLastRow() < 2) return [];
   return sh.getRange(2, 1, sh.getLastRow() - 1, QUESTION_HEADERS.length).getValues().map((r, i) => ({
     row: i + 2, id: r[0], bank: r[1], q: r[2], correct: r[3], d1: r[4], d2: r[5], d3: r[6], e: r[7], axis: r[8], active: r[9] !== 'لا'
@@ -116,17 +120,17 @@ function addQuestion(q) {
 }
 function toggleQuestion(row) {
   guard_();
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_QUESTIONS);
+  const sh = ss_().getSheetByName(SHEET_QUESTIONS);
   const cell = sh.getRange(Number(row), 10);
   cell.setValue(cell.getValue() === 'لا' ? 'نعم' : 'لا');
   return getQuestions();
 }
 function deleteResult(id) {
   guard_();
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_RESULTS);
+  const sh = ss_().getSheetByName(SHEET_RESULTS);
   const ids = sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues().map(r => r[0]);
   const i = ids.indexOf(id);
   if (i > -1) sh.deleteRow(i + 2);
   return getResults();
 }
-function sheetUrl() { guard_(); return SpreadsheetApp.getActiveSpreadsheet().getUrl(); }
+function sheetUrl() { guard_(); return ss_().getUrl(); }
