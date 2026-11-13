@@ -11,6 +11,11 @@
 const SHEET_ID = '';
 function ss_() { return SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
 
+// هوية اللوحة
+const OWNER_NAME = '';
+const ORG_NAME = '';
+const ACCENT = '#E0A526';
+
 const SHEET_RESULTS = 'النتائج';
 const SHEET_QUESTIONS = 'أسئلة_إضافية';
 const RESULT_HEADERS = ['التاريخ', 'المعرّف', 'الاسم', 'الجوال', 'المرحلة', 'التخصص', 'الاختبار', 'رمز البنك', 'الطريقة',
@@ -134,3 +139,4 @@ function deleteResult(id) {
   return getResults();
 }
 function sheetUrl() { guard_(); return ss_().getUrl(); }
+function getMeta() { guard_(); return { owner: OWNER_NAME, org: ORG_NAME, accent: ACCENT, url: ss_().getUrl() }; }
