@@ -166,11 +166,12 @@
   window.addEventListener("hashchange", route);
   function route() {
     clearInterval(timerId);
-    const [view, arg] = (location.hash.slice(1) || "home").split("/");
+    const [view, arg, arg2] = (location.hash.slice(1) || "home").split("/");
     window.scrollTo(0, 0);
     setTimeout(() => window.scrollTo(0, 0), 0);
     if (view === "exam") return viewExam();
-    if (view === "setup") return need(() => viewSetup(arg), "setup/" + arg);
+    if (view === "setup") return need(() => viewSetup(arg, arg2), "setup/" + arg + (arg2 ? "/" + arg2 : ""));
+    if (view === "standards") return viewGuide(arg);
     if (view === "result") return viewResult(arg);
     if (view === "history") return viewHistory();
     if (view === "profile") return viewProfile();
@@ -236,7 +237,7 @@
       '<div class="panel weights"><h2>مجالات الاختبار التربوي العام</h2><p class="panel-sub">الوزن النسبي لكل مجال كما في دليل المتقدم</p>' +
       [["القيم والمسؤوليات المهنية", 21, 3], ["المعرفة المهنية", 40, 3], ["الممارسة المهنية", 39, 3]].map(([n, w, k]) =>
         '<div class="wrow"><div class="wlbl"><span>' + n + "</span><b>" + toAr(w) + '٪</b></div><div class="wbar"><i style="--w:' + (w / 40 * 100) + '%"></i></div><small>' + toAr(k) + " معايير</small></div>").join("") +
-      '<button class="btn" data-go="setup/gen">ابدأ</button></div>' +
+      '<div class="w-acts"><button class="btn" data-go="setup/gen">ابدأ</button><button class="btn ghost" data-go="standards">راجع المعايير</button></div></div>' +
       '<div class="panel ladder"><h2>مستويات الرخصة</h2><p class="panel-sub">الدرجة المطلوبة في كلا الاختبارين، العام والتخصصي</p><ol>' +
       '<li class="l1"><b>معلم ممارس</b><span>٥٠ – ٦٩</span></li>' +
       '<li class="l2"><b>معلم متقدم</b><span>٧٠ – ٧٩</span></li>' +
@@ -285,6 +286,36 @@
     next.onclick = quickQuestion;
   }
 
+  /* ---------- مراجعة المعايير ---------- */
+  function viewGuide(arg) {
+    const list = (window.GUIDE && window.GUIDE.gen) || [];
+    const subsOf = ax => Object.keys(G.subs || {}).filter(k => +k.split(".")[0] === ax + 1);
+    const domOf = ax => (G.domains.find(d => d.standards.includes(ax)) || {}).name || "";
+    const item = arg != null && arg !== "" ? list.find(x => x.ax === +arg) : null;
+    if (!item) {
+      main.innerHTML = '<h1 class="page-h">مراجعة المعايير</h1><p class="page-sub">شرح مختصر لمعايير الاختبار التربوي العام: ما يقيسه كل معيار، وأهم مفاهيمه، والأخطاء الشائعة فيه، ثم تدريب على أسئلته.</p>' +
+        G.domains.map(d => '<section class="g-domain"><h2>' + esc(d.name) + "</h2><div class=\"g-cards\">" +
+          d.standards.filter(ax => list.some(x => x.ax === ax)).map(ax => {
+            const it = list.find(x => x.ax === ax);
+            return '<button class="g-card" data-go="standards/' + ax + '"><span class="g-num">' + toAr(ax + 1) + "</span><b>" + esc(G.standards[ax]) + "</b><small>" +
+              (G.weights ? "الوزن النسبي " + toAr(G.weights[ax]) + "٪ · " : "") + toAr(subsOf(ax).length) + " معايير فرعية</small><span class=\"g-sum\">" + esc(it.summary) + "</span></button>";
+          }).join("") + "</div></section>").join("");
+      return;
+    }
+    const ax = item.ax, idx = list.indexOf(item), prev = list[idx - 1], next = list[idx + 1];
+    main.innerHTML = '<div class="g-detail"><p class="g-crumb"><button class="link" data-go="standards">مراجعة المعايير</button> ‹ ' + esc(domOf(ax)) + "</p>" +
+      '<h1 class="page-h">' + toAr(ax + 1) + ". " + esc(G.standards[ax]) + "</h1>" +
+      (G.weights ? '<p class="page-sub">الوزن النسبي في الاختبار ' + toAr(G.weights[ax]) + "٪</p>" : "") +
+      '<p class="g-lead">' + esc(item.summary) + "</p>" +
+      '<section class="g-block"><h2>المعايير الفرعية</h2><ul class="g-subs">' + subsOf(ax).map(k => "<li><b>" + esc(k) + "</b> " + esc(G.subs[k]) + "</li>").join("") + "</ul></section>" +
+      '<section class="g-block"><h2>مفاهيم أساسية</h2><dl class="g-concepts">' + item.concepts.map(([t, d]) => "<div><dt>" + esc(t) + "</dt><dd>" + esc(d) + "</dd></div>").join("") + "</dl></section>" +
+      '<section class="g-block g-warn"><h2>أخطاء شائعة</h2><ul>' + item.pitfalls.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul></section>" +
+      (item.tip ? '<p class="g-tip"><b>عند الإجابة:</b> ' + esc(item.tip) + "</p>" : "") +
+      '<div class="g-actions"><button class="btn mark" data-go="setup/gen/' + ax + '">تدرّب على أسئلة هذا المعيار</button>' +
+      (prev ? '<button class="btn ghost" data-go="standards/' + prev.ax + '">المعيار السابق</button>' : "") +
+      (next ? '<button class="btn ghost" data-go="standards/' + next.ax + '">المعيار التالي</button>' : "") + "</div></div>";
+  }
+
   /* ---------- التسجيل والملف ---------- */
   function specOptions(sel) {
     return '<option value="">اختر التخصص</option>' + SPECS.map(g => '<optgroup label="' + esc(g.group) + '">' +
@@ -318,7 +349,7 @@
   }
 
   /* ---------- إعداد الاختبار ---------- */
-  async function viewSetup(id) {
+  async function viewSetup(id, preAx) {
     const info = bankInfo(id);
     if (!info) return go("home");
     main.innerHTML = '<p class="loading">جارٍ تحميل الأسئلة…</p>';
@@ -347,6 +378,9 @@
       '<button class="btn" type="submit" style="width:100%">بدء الاختبار</button></form></div></div>';
     const sf = $("#sf");
     sf.addEventListener("change", () => { $("#practiceOpts").hidden = sf.mode.value !== "practice"; });
+    if (preAx != null && sf.axis.querySelector('option[value="' + preAx + '"]')) {
+      sf.mode.value = "practice"; $("#practiceOpts").hidden = false; sf.axis.value = preAx;
+    }
     sf.addEventListener("submit", async e => {
       e.preventDefault();
       if (store.get(K.live, null) && !(await confirmBox("لديك اختبار مفتوح", "بدء اختبار جديد يلغي الاختبار المفتوح ولا يحفظ نتيجته.", "بدء اختبار جديد"))) return;
