@@ -6,7 +6,7 @@ window.TENANTS = {
     OWNER_NAME: "أ. أماني الردادي",
     ORG_NAME: "متوسطة أروى بنت أنيس وثانوية البيان",
     LOGO_URL: "assets/albayan-logo.png",
-    SCRIPT_URL: "",
+    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxzos2cQIctp90uR8JMJCU0i238GHiqrLv4vwVgf-up9D0g0Vez-by3so1tCCppGEqXDg/exec",
     STAGES: ["متوسط", "ثانوي"],
     INK: "#3A3168",
     INK_2: "#4A4083",
