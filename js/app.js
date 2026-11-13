@@ -146,11 +146,17 @@
       '<button class="btn" data-go="setup/gen">ابدأ التربوي العام</button>' +
       (mySpec ? '<button class="btn ghost" data-go="setup/' + mySpec.id + '">اختبار ' + esc(mySpec.name) + "</button>" : '<a class="btn ghost" href="#specs">اختيار تخصص</a>') +
       "</div></div>" +
+      '<div class="hero-side"><section class="about" aria-labelledby="aboutH"><h2 id="aboutH">عن اختبار الرخصة المهنية</h2><dl>' +
+      "<div><dt>الاختبار التربوي العام</dt><dd>مشترك بين جميع المعلمين، ويقيس ثلاثة مجالات: القيم والمسؤوليات المهنية، والمعرفة المهنية، والممارسة المهنية.</dd></div>" +
+      "<div><dt>الاختبار التخصصي</dt><dd>يقيس مفاهيم التخصص وبنيته، ولكل تخصص اختبار مستقل.</dd></div>" +
+      "<div><dt>الدرجة المطلوبة</dt><dd>لا تُمنح الرخصة بأقل من ٥٠ في كل اختبار، ويتحدد مستواها بالدرجة الأدنى من الاختبارين مع المؤهل وسنوات الخبرة.</dd></div>" +
+      "<div><dt>في المنصة</dt><dd>" + toAr(93) + " سؤالًا في التربوي العام، و" + toAr(Object.keys(SPEC_INDEX).length) + " تخصصًا، وتفسير لكل إجابة.</dd></div>" +
+      "</dl></section>" +
       '<aside class="ready" aria-label="بطاقة الجاهزية"><h2>بطاقة جاهزيتك</h2><p class="who">' +
       (user ? esc(user.name) + (mySpec ? " — " + esc(mySpec.name) : "") : "سجّل بياناتك لتظهر نتائجك هنا") + "</p>" +
       readyRow("التربوي العام", "آخر محاكاة", g) +
       readyRow(mySpec ? mySpec.name : "اختبار التخصص", mySpec ? "آخر محاكاة" : "لم يُحدَّد التخصص", s) +
-      "</aside></section>";
+      "</aside></div></section>";
 
     html += '<section class="general" style="margin-top:20px"><div><h3>' + esc(G.name) + '</h3><p style="margin:0 0 8px;opacity:.8;font-size:13.5px">يشترك فيه جميع المعلمين، ويغطي ثلاثة مجالات:</p><ul>' + G.domains.map(d => "<li>" + esc(d.name) + "</li>").join("") +
       '</ul></div><div class="acts"><button class="btn mark" data-go="setup/gen">ابدأ</button></div></section>';

@@ -53,11 +53,21 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .err{color:var(--bad);font-size:13.5px;margin:-8px 0 12px}
 
 /* الرئيسية */
-.hero{display:grid;grid-template-columns:1fr;justify-items:center;gap:26px;padding:40px 0 24px;text-align:center}
-.hero-main{max-width:680px}
-.hero .hero-name{font-size:clamp(96px,18vw,170px);line-height:1.2;font-weight:800;margin:0;letter-spacing:0}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:center;padding:36px 0 24px}
+.hero-main{text-align:center}
+.hero .hero-name{font-size:clamp(96px,13vw,170px);line-height:1.2;font-weight:800;margin:0;letter-spacing:0}
+.hero-side{display:grid;gap:16px}
+.about{background:var(--ink);color:#fff;border-radius:var(--r-m);padding:20px 22px}
+.about h2{font-size:16px;margin:0 0 10px}
+.about dl{margin:0;display:grid;gap:10px}
+.about dl div{border-top:1px solid rgba(255,255,255,.15);padding-top:10px}
+.about dt{font-weight:700;font-size:14px;color:var(--mark)}
+.about dd{margin:2px 0 0;font-size:13.5px;line-height:1.75;opacity:.92}
+.hero-side .ready{padding:16px 20px 12px}
+.hero-side .ready .who{margin-bottom:8px}
+.hero-side .ready-row{padding:8px 0}
+.hero-side .ready-row .val{font-size:22px}
 .hero-sub{font-size:clamp(20px,3vw,26px);font-weight:700;margin:4px 0 14px;color:var(--ink-2)}
-.hero .ready{width:100%;max-width:520px;text-align:start}
 .hero h1{font-size:clamp(28px,4.4vw,46px);line-height:1.35;font-weight:800;margin:0 0 14px;letter-spacing:-.3px}
 .hero p.lead{font-family:var(--naskh);font-size:19px;line-height:1.9;color:var(--graphite);margin:0 auto 24px;max-width:36em}
 .hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
@@ -208,6 +218,7 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .loading{padding:60px 0;text-align:center;color:var(--muted)}
 
 @media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:24px;padding-top:28px}
   .exam{grid-template-columns:1fr}
   .side{position:static;order:2}
   .general{grid-template-columns:1fr}
