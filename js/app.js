@@ -137,8 +137,9 @@
     const live = store.get(K.live, null);
     const mySpec = user && SPEC_INDEX[user.spec];
     const g = lastScore("gen"), s = mySpec ? lastScore(mySpec.id) : null;
-    let html = '<section class="hero"><div>' +
-      "<h1>تدرّب على اختبار الرخصة المهنية</h1>" +
+    let html = '<section class="hero"><div class="hero-main">' +
+      '<h1 class="hero-name">' + esc(C.PLATFORM_NAME) + "</h1>" +
+      '<p class="hero-sub">تدرّب على اختبار الرخصة المهنية</p>' +
       '<p class="lead">محاكاة للاختبار التربوي العام واختبارات التخصص، بمؤقت وتنقل بين الأسئلة كما في قاعة الاختبار، ثم تحليل لدرجتك في كل معيار وتفسير لكل إجابة.</p>' +
       '<div class="hero-actions">' +
       (live ? '<button class="btn mark" data-go="exam">استكمال الاختبار المفتوح</button>' : "") +

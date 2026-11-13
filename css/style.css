@@ -53,10 +53,14 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .err{color:var(--bad);font-size:13.5px;margin:-8px 0 12px}
 
 /* الرئيسية */
-.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:center;padding:20px 0 36px}
+.hero{display:grid;grid-template-columns:1fr;justify-items:center;gap:30px;padding:44px 0 36px;text-align:center}
+.hero-main{max-width:640px}
+.hero .hero-name{font-size:clamp(64px,13vw,128px);line-height:1.15;font-weight:800;margin:0;letter-spacing:0}
+.hero-sub{font-size:clamp(20px,3vw,26px);font-weight:700;margin:4px 0 14px;color:var(--ink-2)}
+.hero .ready{width:100%;max-width:520px;text-align:start}
 .hero h1{font-size:clamp(28px,4.4vw,46px);line-height:1.35;font-weight:800;margin:0 0 14px;letter-spacing:-.3px}
-.hero p.lead{font-family:var(--naskh);font-size:19px;line-height:1.9;color:var(--graphite);margin:0 0 24px;max-width:36em}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+.hero p.lead{font-family:var(--naskh);font-size:19px;line-height:1.9;color:var(--graphite);margin:0 auto 24px;max-width:36em}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 
 /* بطاقة الجاهزية: ورقة إجابة مصغرة */
 .ready{background:var(--sheet);border:1.5px solid var(--ink);border-radius:var(--r-m);padding:22px 22px 18px;position:relative}
@@ -204,7 +208,6 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .loading{padding:60px 0;text-align:center;color:var(--muted)}
 
 @media (max-width:860px){
-  .hero{grid-template-columns:1fr;gap:26px}
   .exam{grid-template-columns:1fr}
   .side{position:static;order:2}
   .general{grid-template-columns:1fr}
