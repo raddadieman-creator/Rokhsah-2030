@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1C2A48;--ink-2:#2B3D63;--paper:#F5F6F1;--rule:#D9DCE3;--rule-2:#E9EBEF;--muted:#5F6675;--mark:#E0A526;--mark-soft:#FBEFD0;--ok:#2F7A57;--ok-soft:#E3F1EA;--bad:#B4442F;--bad-soft:#F6E4DF;--graphite:#3D4250}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Kufi Arabic",system-ui,sans-serif;font-size:14px;line-height:1.7}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+header{background:var(--ink);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{margin:0;font-size:18px}header small{opacity:.75;display:block;font-size:12px}
+header a{color:#fff;font-size:13px}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 50px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--ink);margin-bottom:18px;overflow-x:auto}
+.tabs button{background:none;border:0;padding:10px 16px;font-weight:700;color:var(--muted);border-radius:6px 6px 0 0;white-space:nowrap}
+.tabs button[aria-selected=true]{background:var(--ink);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.kpi b{display:block;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.3}
+.kpi span{color:var(--muted);font-size:13px}
+.bands{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.bands h2{font-size:14px;margin:0 0 8px}
+.brow{display:grid;grid-template-columns:110px 1fr 50px;gap:10px;align-items:center;font-size:13px;padding:3px 0}
+.bbar{height:10px;background:var(--rule-2);border-radius:10px;overflow:hidden}.bbar i{display:block;height:100%;border-radius:10px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:end}
+.filters label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:2px}
+.filters select,.filters input{border:1.5px solid var(--rule);border-radius:6px;padding:7px 9px;background:#fff;min-width:140px;color:var(--ink)}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:6px;padding:8px 16px;font-weight:700}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.sm{padding:4px 10px;font-size:12.5px}
+.tbl-wrap{overflow-x:auto;background:#fff;border:1px solid var(--rule);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 12px;text-align:start;border-bottom:1px solid var(--rule-2);vertical-align:top}
+th{background:var(--paper);color:var(--muted);font-size:12.5px;white-space:nowrap;position:sticky;top:0}
+td.n{font-weight:800;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;border-radius:20px;padding:0 9px;font-size:12px;font-weight:700}
+.p0{background:var(--bad-soft);color:var(--bad)}.p1{background:var(--mark-soft);color:#6B4E0B}.p2{background:#E4EAF5;color:var(--ink)}.p3{background:var(--ok-soft);color:var(--ok)}
+.detail td{background:#FAFBF8;font-size:13px;color:var(--graphite)}
+.muted{color:var(--muted)}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.form{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:18px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:700}
+.form input,.form select,.form textarea{border:1.5px solid var(--rule);border-radius:6px;padding:8px 10px;font-weight:400}
+.form .full{grid-column:1/-1}
+.msg{font-size:13px;margin:0}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.loading{padding:40px;text-align:center;color:var(--muted)}
+a.wa{color:var(--ok);font-weight:700;text-decoration:none}
+@media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div><h1 id="title">لوحة نتائج المنصة</h1><small>لا تُفتح إلا بحسابك في Google</small></div><a id="sheetLink" href="#" target="_blank" rel="noopener">فتح جدول البيانات</a></header>
+<div class="wrap">
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="results">النتائج</button>
+    <button role="tab" aria-selected="false" data-tab="people">المتدربون</button>
+    <button role="tab" aria-selected="false" data-tab="questions">إضافة أسئلة</button>
+  </div>
+  <section id="results"><p class="loading">جارٍ تحميل النتائج…</p></section>
+  <section id="people" hidden></section>
+  <section id="questions" hidden></section>
+</div>
+<script>
+/* الاختبار التربوي العام: المجالات والمعايير كما تعلنها هيئة تقويم التعليم والتدريب */
+const GENERAL = {
+  id: "gen",
+  name: "الاختبار التربوي العام",
+  file: "general",
+  domains: [
+    { name: "القيم والمسؤوليات المهنية", standards: [0, 1, 2, 3] },
+    { name: "المعرفة المهنية", standards: [4, 5, 6] },
+    { name: "الممارسة المهنية", standards: [7, 8, 9] }
+  ],
+  standards: [
+    "الالتزام بالقيم الإسلامية الوسطية وأخلاقيات المهنة وتعزيز الهوية الوطنية",
+    "التطوير المهني المستمر",
+    "التفاعل المهني مع التربويين والمجتمع",
+    "الإلمام بالمهارات اللغوية والكمية",
+    "المعرفة بالمتعلم وكيفية تعلمه",
+    "المعرفة بمحتوى التخصص وطرق تدريسه",
+    "المعرفة بطرق التدريس العامة",
+    "التخطيط للتدريس وتنفيذه",
+    "تهيئة بيئات تعلم تفاعلية وداعمة للمتعلم",
+    "التقويم"
+  ]
+};
+
+/* التخصصات: المحاور هنا تقسيم تدريبي للأسئلة داخل المنصة، وليست الأوزان الرسمية */
+const SPECS = [
+  { group: "الدين واللغة العربية", file: "islamic-arabic", items: [
+    { id: "isl1", name: "التربية الإسلامية 1", stage: "ابتدائي", axes: ["القرآن الكريم وعلومه", "العقيدة", "الحديث والسيرة", "الفقه", "طرق التدريس"] },
+    { id: "isl2", name: "التربية الإسلامية 2", stage: "متوسط وثانوي", axes: ["التفسير وعلوم القرآن", "العقيدة", "الحديث وعلومه", "الفقه وأصوله", "طرق التدريس"] },
+    { id: "ar1", name: "اللغة العربية 1", stage: "ابتدائي", axes: ["النحو والصرف", "الإملاء والخط", "القراءة والفهم", "طرق التدريس"] },
+    { id: "ar2", name: "اللغة العربية 2", stage: "متوسط وثانوي", axes: ["النحو والصرف", "البلاغة", "الأدب والنقد", "طرق التدريس"] }
+  ]},
+  { group: "الرياضيات والعلوم", file: "math-science", items: [
+    { id: "math1", name: "الرياضيات 1", stage: "ابتدائي", axes: ["الأعداد والعمليات", "الهندسة والقياس", "الجبر والأنماط", "طرق التدريس"] },
+    { id: "math2", name: "الرياضيات 2", stage: "متوسط وثانوي", axes: ["الجبر والدوال", "الهندسة والمثلثات", "التفاضل والتكامل", "الإحصاء والاحتمال"] },
+    { id: "sci", name: "العلوم", stage: "ابتدائي ومتوسط", axes: ["علوم الحياة", "العلوم الفيزيائية", "علوم الأرض والفضاء", "طرق التدريس"] },
+    { id: "phy", name: "الفيزياء", stage: "ثانوي", axes: ["الميكانيكا", "الكهرباء والمغناطيسية", "الموجات والضوء", "الحرارة والفيزياء الحديثة"] },
+    { id: "chem", name: "الكيمياء", stage: "ثانوي", axes: ["بنية المادة", "الحسابات الكيميائية", "التفاعلات والاتزان", "الكيمياء العضوية"] },
+    { id: "bio", name: "الأحياء", stage: "ثانوي", axes: ["الخلية والوراثة", "تنوع الكائنات", "أجهزة الجسم", "البيئة"] },
+    { id: "earth", name: "علم الأرض", stage: "ثانوي", axes: ["المعادن والصخور", "العمليات الداخلية والخارجية", "الغلاف الجوي والمائي", "الفلك"] }
+  ]},
+  { group: "اللغة الإنجليزية والاجتماعيات", file: "english-social", items: [
+    { id: "eng1", name: "اللغة الإنجليزية 1", stage: "ابتدائي", dir: "ltr", axes: ["Grammar", "Vocabulary & Phonology", "Language Acquisition", "Teaching Methods"] },
+    { id: "eng2", name: "اللغة الإنجليزية 2", stage: "متوسط وثانوي", dir: "ltr", axes: ["Grammar & Syntax", "Linguistics", "Literature & Reading", "Teaching & Assessment"] },
+    { id: "soc", name: "الاجتماعيات", stage: "ابتدائي ومتوسط", axes: ["التاريخ", "الجغرافيا", "المواطنة", "طرق التدريس"] },
+    { id: "hist", name: "التاريخ", stage: "ثانوي", axes: ["السيرة والتاريخ الإسلامي", "تاريخ الدولة السعودية", "التاريخ الحديث", "منهج البحث التاريخي"] },
+    { id: "geo", name: "الجغرافيا", stage: "ثانوي", axes: ["الجغرافيا الطبيعية", "الجغرافيا البشرية", "الخرائط والتقنيات", "جغرافية المملكة"] },
+    { id: "socio", name: "علم الاجتماع", stage: "ثانوي", axes: ["المفاهيم والنظريات", "المؤسسات الاجتماعية", "المشكلات والتغير", "مناهج البحث"] },
+    { id: "psy", name: "علم النفس", stage: "ثانوي", axes: ["النمو", "التعلم والذاكرة", "الشخصية والدافعية", "القياس النفسي"] }
+  ]},
+  { group: "تخصصات تطبيقية ومهنية", file: "applied", items: [
+    { id: "comp", name: "الحاسب الآلي", stage: "جميع المراحل", axes: ["البرمجة والخوارزميات", "الشبكات والأمن", "قواعد البيانات", "تقنيات التعليم"] },
+    { id: "art", name: "التربية الفنية", stage: "جميع المراحل", axes: ["عناصر التصميم وأسسه", "تاريخ الفن", "المجالات الفنية", "طرق التدريس"] },
+    { id: "pe", name: "التربية الصحية والبدنية", stage: "جميع المراحل", axes: ["علوم الحركة والتدريب", "الصحة والإسعافات", "المهارات الرياضية", "طرق التدريس"] },
+    { id: "family", name: "التربية الأسرية", stage: "جميع المراحل", axes: ["التغذية", "الملابس والنسيج", "الأسرة والطفولة", "إدارة المنزل"] },
+    { id: "kg", name: "رياض الأطفال", stage: "الطفولة المبكرة", axes: ["النمو والتعلم", "اللعب والأركان", "التخطيط والتقويم", "الشراكة مع الأسرة"] },
+    { id: "couns", name: "التوجيه والإرشاد الطلابي", stage: "جميع المراحل", axes: ["نظريات الإرشاد", "الإرشاد المهني", "الحالات والمشكلات", "القياس والأخلاقيات"] }
+  ]},
+  { group: "التربية الخاصة والموهبة", file: "special-ed", items: [
+    { id: "sped", name: "التربية الخاصة (عام)", stage: "جميع المراحل", axes: ["المفاهيم والتشريعات", "التعليم الشامل", "البرنامج التربوي الفردي", "التقييم والتشخيص"] },
+    { id: "ld", name: "صعوبات التعلم", stage: "جميع المراحل", axes: ["المفهوم والتصنيف", "التشخيص", "الاستراتيجيات العلاجية", "غرفة المصادر"] },
+    { id: "intel", name: "الإعاقة الفكرية", stage: "جميع المراحل", axes: ["المفهوم والتصنيف", "السلوك التكيفي", "استراتيجيات التدريس", "تعديل السلوك"] },
+    { id: "autism", name: "اضطراب طيف التوحد", stage: "جميع المراحل", axes: ["الخصائص والتشخيص", "التواصل", "التدخلات المبنية على الأدلة", "تعديل السلوك"] },
+    { id: "hear", name: "الإعاقة السمعية", stage: "جميع المراحل", axes: ["السمع وقياسه", "طرق التواصل", "المعينات السمعية", "استراتيجيات التدريس"] },
+    { id: "vis", name: "الإعاقة البصرية", stage: "جميع المراحل", axes: ["البصر وقياسه", "طريقة برايل", "التوجه والحركة", "استراتيجيات التدريس"] },
+    { id: "gifted", name: "الموهبة والتفوق", stage: "جميع المراحل", axes: ["المفهوم والنظريات", "الكشف والتعرف", "البرامج والإثراء", "التفكير الإبداعي"] }
+  ]}
+];
+
+
+
+const BANK_LIST=[{id:'gen',name:GENERAL.name,axes:GENERAL.standards}];SPECS.forEach(g=>g.items.forEach(s=>BANK_LIST.push(s)));
+const BANK=Object.fromEntries(BANK_LIST.map(b=>[b.id,b]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const band=p=>p>=80?3:p>=70?2:p>=50?1:0;
+let RES=[],QS=[],open=null;
+const run=(fn,arg)=>new Promise((ok,no)=>{const r=google.script.run.withSuccessHandler(ok).withFailureHandler(no);arg===undefined?r[fn]():r[fn](arg);});
+
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['results','people','questions'].forEach(id=>document.getElementById(id).hidden=id!==b.dataset.tab);
+  if(b.dataset.tab==='people')drawPeople(); if(b.dataset.tab==='questions')loadQuestions();
+});
+run('sheetUrl').then(u=>document.getElementById('sheetLink').href=u).catch(()=>{});
+
+function load(){run('getResults').then(r=>{RES=r.sort((a,b)=>b.ts-a.ts);drawResults();}).catch(e=>{document.getElementById('results').innerHTML='<p class="empty">تعذّر تحميل النتائج: '+esc(e.message)+'</p>';});}
+load();
+
+function filtered(){
+  const f=id=>(document.getElementById(id)||{}).value||'';
+  const t=f('fTest'),m=f('fMode'),s=f('fSpec'),st=f('fStage'),q=f('fQ').trim(),d=f('fFrom');
+  return RES.filter(r=>(!t||r.bank===t)&&(!m||r.mode===m)&&(!s||r.spec===s)&&(!st||r.stage===st)&&(!q||String(r.name).includes(q)||String(r.phone).includes(q))&&(!d||r.ts>=new Date(d).getTime()));
+}
+function drawResults(){
+  const el=document.getElementById('results');
+  if(!RES.length){el.innerHTML='<p class="empty">لم تصل أي نتيجة بعد. حين يُنهي متدرب اختبارًا في المنصة تظهر نتيجته هنا.</p>';return;}
+  const specs=[...new Set(RES.map(r=>r.spec).filter(Boolean))].sort();
+  const tests=[...new Set(RES.map(r=>r.bank))];
+  el.innerHTML='<div class="kpis" id="kpis"></div><div class="bands" id="bands"></div>'+
+   '<div class="filters"><label>الاختبار<select id="fTest"><option value="">الكل</option>'+tests.map(b=>'<option value="'+esc(b)+'">'+esc((BANK[b]||{}).name||b)+'</option>').join('')+'</select></label>'+
+   '<label>الطريقة<select id="fMode"><option value="">الكل</option><option>محاكاة</option><option>تدريب</option></select></label>'+
+   '<label>المرحلة<select id="fStage"><option value="">الكل</option><option>ابتدائي</option><option>متوسط</option><option>ثانوي</option></select></label>'+
+   '<label>تخصص المتدرب<select id="fSpec"><option value="">الكل</option>'+specs.map(s=>'<option>'+esc(s)+'</option>').join('')+'</select></label>'+
+   '<label>بحث بالاسم أو الجوال<input id="fQ" type="search"></label><label>من تاريخ<input id="fFrom" type="date"></label>'+
+   '<button class="btn ghost" id="csv">تصدير CSV</button><button class="btn ghost" id="reload">تحديث</button></div>'+
+   '<div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>الاسم</th><th>الجوال</th><th>الاختبار</th><th>الطريقة</th><th>الدرجة</th><th>الصحيحة</th><th>المدة</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>';
+  ['fTest','fMode','fSpec','fStage','fQ','fFrom'].forEach(id=>document.getElementById(id).addEventListener('input',paint));
+  document.getElementById('csv').onclick=csv; document.getElementById('reload').onclick=()=>{el.innerHTML='<p class="loading">جارٍ التحديث…</p>';load();};
+  paint();
+}
+function paint(){
+  const rows=filtered(), sims=rows.filter(r=>r.mode==='محاكاة');
+  const people=new Set(rows.map(r=>r.phone||r.name)).size;
+  const avg=sims.length?Math.round(sims.reduce((a,r)=>a+Number(r.pct),0)/sims.length):0;
+  const pass=sims.length?Math.round(sims.filter(r=>r.pct>=50).length/sims.length*100):0;
+  document.getElementById('kpis').innerHTML=[[people,'متدربًا'],[rows.length,'محاولة'],[avg+'٪','متوسط درجات المحاكاة'],[pass+'٪','نسبة من بلغ ٥٠ فأكثر في المحاكاة']].map(k=>'<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>').join('');
+  const cnt=[0,0,0,0];sims.forEach(r=>cnt[band(r.pct)]++);const mx=Math.max(1,...cnt);
+  const names=['أقل من ٥٠','٥٠–٦٩','٧٠–٧٩','٨٠ فأعلى'],cols=['var(--bad)','var(--mark)','var(--ink)','var(--ok)'];
+  document.getElementById('bands').innerHTML='<h2>توزيع درجات المحاكاة</h2>'+cnt.map((c,i)=>'<div class="brow"><span>'+names[i]+'</span><div class="bbar"><i style="width:'+(c/mx*100)+'%;background:'+cols[i]+'"></i></div><b>'+c+'</b></div>').join('');
+  document.getElementById('rows').innerHTML=rows.map(r=>'<tr><td>'+new Date(r.ts).toLocaleString('ar-SA-u-ca-gregory',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</td><td>'+esc(r.name)+'<div class="muted" style="font-size:12px">'+esc([r.stage,r.spec].filter(Boolean).join(' — '))+'</div></td><td dir="ltr" style="text-align:end">'+esc(r.phone)+'</td><td>'+esc(r.test)+'</td><td>'+esc(r.mode)+'</td><td class="n"><span class="pill p'+band(r.pct)+'">'+r.pct+'٪</span></td><td class="n">'+r.correct+' / '+r.total+'</td><td>'+r.minutes+' د</td><td><button class="btn ghost sm" data-d="'+esc(r.id)+'">'+(open===r.id?'إخفاء':'تفاصيل')+'</button></td></tr>'+
+    (open===r.id?'<tr class="detail"><td colspan="9"><b>الأداء في المحاور:</b> '+esc(r.axes)+'<br><b>أرقام الأسئلة الخاطئة أو غير المُجابة:</b> '+(esc(r.wrong)||'لا يوجد')+'<br><b>انتهى الوقت:</b> '+esc(r.timeUp)+' — <b>المُجاب:</b> '+r.answered+' من '+r.total+' <button class="btn ghost sm" data-del="'+esc(r.id)+'" style="margin-inline-start:10px">حذف هذه النتيجة</button></td></tr>':'')).join('')||'<tr><td colspan="9" class="empty">لا توجد نتائج تطابق التصفية.</td></tr>';
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{open=open===b.dataset.d?null:b.dataset.d;paint();});
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(!confirm('حذف النتيجة نهائيًا من الجدول؟'))return;run('deleteResult',b.dataset.del).then(r=>{RES=r.sort((a,b)=>b.ts-a.ts);open=null;paint();});});
+}
+function csv(){
+  const rows=filtered(),h=['التاريخ','الاسم','الجوال','المرحلة','التخصص','الاختبار','الطريقة','الدرجة','الصحيحة','العدد','المدة','الأداء في المحاور'];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const body=rows.map(r=>[new Date(r.ts).toISOString().slice(0,16).replace('T',' '),r.name,r.phone,r.stage,r.spec,r.test,r.mode,r.pct,r.correct,r.total,r.minutes,r.axes].map(q).join(','));
+  const blob=new Blob(['﻿'+[h.map(q).join(',')].concat(body).join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='نتائج-المنصة.csv';a.click();
+}
+function drawPeople(){
+  const el=document.getElementById('people');
+  if(!RES.length){el.innerHTML='<p class="empty">لا يوجد متدربون بعد.</p>';return;}
+  const by={};RES.forEach(r=>{const k=r.phone||r.name;(by[k]=by[k]||[]).push(r);});
+  const list=Object.values(by).map(a=>{const sims=a.filter(r=>r.mode==='محاكاة');const g=sims.filter(r=>r.bank==='gen'),s=sims.filter(r=>r.bank!=='gen');
+    return {name:a[0].name,stage:a[0].stage||'',phone:a[0].phone,spec:a[0].spec||(a.find(r=>r.bank!=='gen')||{}).test||'',n:a.length,last:a[0].ts,g:g.length?Math.max(...g.map(r=>r.pct)):null,s:s.length?Math.max(...s.map(r=>r.pct)):null};}).sort((a,b)=>b.last-a.last);
+  const wa=p=>{const d=String(p).replace(/\D/g,'');return d.startsWith('05')?'966'+d.slice(1):d;};
+  el.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>الاسم</th><th>المرحلة</th><th>التخصص</th><th>الجوال</th><th>المحاولات</th><th>أعلى درجة: التربوي العام</th><th>أعلى درجة: التخصص</th><th>آخر نشاط</th></tr></thead><tbody>'+
+    list.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+esc(p.stage)+'</td><td>'+esc(p.spec)+'</td><td dir="ltr" style="text-align:end">'+(p.phone?'<a class="wa" target="_blank" rel="noopener" href="https://wa.me/'+wa(p.phone)+'">'+esc(p.phone)+'</a>':'<span class="muted">—</span>')+'</td><td class="n">'+p.n+'</td><td class="n">'+(p.g==null?'<span class="muted">—</span>':'<span class="pill p'+band(p.g)+'">'+p.g+'٪</span>')+'</td><td class="n">'+(p.s==null?'<span class="muted">—</span>':'<span class="pill p'+band(p.s)+'">'+p.s+'٪</span>')+'</td><td>'+new Date(p.last).toLocaleDateString('ar-SA-u-ca-gregory',{day:'numeric',month:'short'})+'</td></tr>').join('')+'</tbody></table></div>';
+}
+function loadQuestions(){
+  const el=document.getElementById('questions');
+  el.innerHTML='<p class="loading">جارٍ التحميل…</p>';
+  run('getQuestions').then(q=>{QS=q;drawQuestions();}).catch(e=>el.innerHTML='<p class="empty">'+esc(e.message)+'</p>');
+}
+function drawQuestions(){
+  const el=document.getElementById('questions');
+  el.innerHTML='<form class="form" id="qf"><label>البنك<select name="bank" id="qBank">'+BANK_LIST.map(b=>'<option value="'+b.id+'">'+esc(b.name)+'</option>').join('')+'</select></label>'+
+   '<label>المحور أو المعيار<select name="axis" id="qAxis"></select></label>'+
+   '<label class="full">نص السؤال<textarea name="q" rows="3" required></textarea></label>'+
+   '<label>الإجابة الصحيحة<input name="correct" required></label><label>بديل خاطئ 1<input name="d1" required></label>'+
+   '<label>بديل خاطئ 2<input name="d2"></label><label>بديل خاطئ 3<input name="d3"></label>'+
+   '<label class="full">التفسير (يظهر للمتدرب بعد الإجابة)<input name="e"></label>'+
+   '<div class="full" style="display:flex;gap:12px;align-items:center"><button class="btn" type="submit">إضافة السؤال</button><p class="msg" id="qMsg"></p></div>'+
+   '<p class="muted full" style="margin:0">ترتيب البدائل يُخلط تلقائيًا عند العرض، فاكتبي الإجابة الصحيحة في حقلها فقط. يظهر السؤال في المنصة من الاختبار التالي.</p></form>'+
+   '<div class="tbl-wrap"><table><thead><tr><th>البنك</th><th>السؤال</th><th>الصحيحة</th><th>الحالة</th><th></th></tr></thead><tbody>'+
+   (QS.length?QS.map(q=>'<tr><td>'+esc((BANK[q.bank]||{}).name||q.bank)+'</td><td>'+esc(q.q)+'<div class="muted" style="font-size:12px">'+esc(q.axis)+'</div></td><td>'+esc(q.correct)+'</td><td>'+(q.active?'<span class="pill p3">مفعّل</span>':'<span class="pill p0">موقوف</span>')+'</td><td><button class="btn ghost sm" data-t="'+q.row+'">'+(q.active?'إيقاف':'تفعيل')+'</button></td></tr>').join(''):'<tr><td colspan="5" class="empty">لم تُضف أسئلة بعد. الأسئلة الأساسية في المنصة لا تظهر هنا.</td></tr>')+'</tbody></table></div>';
+  const fillAxis=()=>{const b=BANK[document.getElementById('qBank').value];document.getElementById('qAxis').innerHTML=b.axes.map(a=>'<option>'+esc(a)+'</option>').join('');};
+  document.getElementById('qBank').onchange=fillAxis;fillAxis();
+  document.getElementById('qf').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const m=document.getElementById('qMsg');m.className='msg';m.textContent='جارٍ الحفظ…';
+    run('addQuestion',f).then(q=>{QS=q;drawQuestions();const mm=document.getElementById('qMsg');mm.className='msg ok';mm.textContent='أُضيف السؤال.';}).catch(err=>{m.className='msg bad';m.textContent=err.message;});};
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>run('toggleQuestion',Number(b.dataset.t)).then(q=>{QS=q;drawQuestions();}));
+}
+</script>
+</body>
+</html>
