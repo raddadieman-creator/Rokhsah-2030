@@ -145,8 +145,8 @@
   }
 
   /* سحب أسئلة التربوي العام بحسب الوزن النسبي لكل معيار */
-  function weighted(qs, n) {
-    const w = G.weights; if (!w) return stratified(qs, n);
+  function weighted(qs, n, w) {
+    w = w || G.weights; if (!w) return stratified(qs, n);
     const groups = {}; shuffle(qs).forEach(q => (groups[q.ax] = groups[q.ax] || []).push(q));
     const total = w.reduce((a, b) => a + b, 0);
     const want = w.map(x => Math.floor(n * x / total));
@@ -331,11 +331,11 @@
     }
     const isGen = id === "gen";
     if (isGen && G.weights) qs = qs.filter(q => q.ax < 0 || G.weights[q.ax] > 0);
-    const simN = isGen ? Math.min(C.GENERAL_SIM_COUNT, qs.length) : qs.length;
-    const mins = isGen ? C.GENERAL_SIM_MINUTES : C.SPEC_SIM_MINUTES;
+    const simN = isGen ? Math.min(C.GENERAL_SIM_COUNT, qs.length) : Math.min(C.SPEC_SIM_COUNT || 50, qs.length);
+    const mins = isGen ? C.GENERAL_SIM_MINUTES : Math.max(C.SPEC_SIM_MINUTES, Math.round(simN * 1.5));
     const counts = {}; qs.forEach(q => counts[q.ax] = (counts[q.ax] || 0) + 1);
     main.innerHTML = '<div class="narrow" style="max-width:640px"><div class="panel">' +
-      '<h1 class="page-h">' + esc(info.name) + '</h1><p class="page-sub">' + esc(info.stage) + " — في البنك " + toAr(qs.length) + " سؤالًا</p>" +
+      '<h1 class="page-h">' + esc(info.name) + '</h1><p class="page-sub">' + esc(info.stage) + " — عدد الأسئلة في البنك: " + toAr(qs.length) + "</p>" +
       '<form id="sf"><fieldset style="border:0;padding:0;margin:0"><legend class="muted" style="font-size:14px">طريقة الاختبار</legend><div class="mode-pick">' +
       '<label><input type="radio" name="mode" value="sim" checked><b>اختبار كامل</b><small>' + toAr(simN) + " سؤالًا في " + toAr(mins) + " دقيقة، والنتيجة والتفسيرات في النهاية.</small></label>" +
       '<label><input type="radio" name="mode" value="practice"><b>تدريب</b><small>دون وقت، وتظهر الإجابة الصحيحة وتفسيرها بعد كل سؤال.</small></label>' +
@@ -352,7 +352,7 @@
       if (store.get(K.live, null) && !(await confirmBox("لديك اختبار مفتوح", "بدء اختبار جديد يلغي الاختبار المفتوح ولا يحفظ نتيجته.", "بدء اختبار جديد"))) return;
       const mode = sf.mode.value;
       let pick;
-      if (mode === "sim") pick = isGen ? weighted(qs, simN) : shuffle(qs);
+      if (mode === "sim") pick = isGen ? weighted(qs, simN) : (info.weights ? weighted(qs, simN, info.weights) : shuffle(qs).slice(0, simN));
       else {
         const ax = sf.axis.value; let pool = ax === "all" ? qs : qs.filter(q => String(q.ax) === ax);
         const n = sf.count.value === "all" ? pool.length : Math.min(+sf.count.value, pool.length);
