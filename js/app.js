@@ -144,6 +144,21 @@
     return shuffle(out);
   }
 
+  /* سحب أسئلة التربوي العام بحسب الوزن النسبي لكل معيار */
+  function weighted(qs, n) {
+    const w = G.weights; if (!w) return stratified(qs, n);
+    const groups = {}; shuffle(qs).forEach(q => (groups[q.ax] = groups[q.ax] || []).push(q));
+    const total = w.reduce((a, b) => a + b, 0);
+    const want = w.map(x => Math.floor(n * x / total));
+    let rest = n - want.reduce((a, b) => a + b, 0);
+    w.map((x, i) => [n * x / total - want[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (rest > 0 && w[i] > 0) { want[i]++; rest--; } });
+    let out = [];
+    want.forEach((k, i) => { const g = groups[i] || []; out = out.concat(g.splice(0, k)); });
+    const left = shuffle(Object.values(groups).flat());
+    while (out.length < n && left.length) out.push(left.shift());
+    return shuffle(out);
+  }
+
   /* ---------- الموجّه ---------- */
   let timerId = null;
   function go(hash) { if (location.hash === "#" + hash) route(); else location.hash = hash; }
@@ -265,6 +280,7 @@
       return;
     }
     const isGen = id === "gen";
+    if (isGen && G.weights) qs = qs.filter(q => q.ax < 0 || G.weights[q.ax] > 0);
     const simN = isGen ? Math.min(C.GENERAL_SIM_COUNT, qs.length) : qs.length;
     const mins = isGen ? C.GENERAL_SIM_MINUTES : C.SPEC_SIM_MINUTES;
     const counts = {}; qs.forEach(q => counts[q.ax] = (counts[q.ax] || 0) + 1);
@@ -286,7 +302,7 @@
       if (store.get(K.live, null) && !(await confirmBox("لديك اختبار مفتوح", "بدء اختبار جديد يلغي الاختبار المفتوح ولا يحفظ نتيجته.", "بدء اختبار جديد"))) return;
       const mode = sf.mode.value;
       let pick;
-      if (mode === "sim") pick = isGen ? stratified(qs, simN) : shuffle(qs);
+      if (mode === "sim") pick = isGen ? weighted(qs, simN) : shuffle(qs);
       else {
         const ax = sf.axis.value; let pool = ax === "all" ? qs : qs.filter(q => String(q.ax) === ax);
         const n = sf.count.value === "all" ? pool.length : Math.min(+sf.count.value, pool.length);
