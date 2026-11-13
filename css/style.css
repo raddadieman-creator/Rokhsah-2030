@@ -53,9 +53,9 @@ label.field input:focus,label.field select:focus{border-color:var(--ink);outline
 .err{color:var(--bad);font-size:13.5px;margin:-8px 0 12px}
 
 /* الرئيسية */
-.hero{display:grid;grid-template-columns:1fr;justify-items:center;gap:30px;padding:44px 0 36px;text-align:center}
-.hero-main{max-width:640px}
-.hero .hero-name{font-size:clamp(64px,13vw,128px);line-height:1.15;font-weight:800;margin:0;letter-spacing:0}
+.hero{display:grid;grid-template-columns:1fr;justify-items:center;gap:30px;padding:0 0 36px;text-align:center}
+.hero-main{max-width:680px;min-height:calc(100vh - 64px - 28px);min-height:calc(100svh - 64px - 28px);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px 0}
+.hero .hero-name{font-size:clamp(110px,24vw,220px);line-height:1.2;font-weight:800;margin:0;letter-spacing:0}
 .hero-sub{font-size:clamp(20px,3vw,26px);font-weight:700;margin:4px 0 14px;color:var(--ink-2)}
 .hero .ready{width:100%;max-width:520px;text-align:start}
 .hero h1{font-size:clamp(28px,4.4vw,46px);line-height:1.35;font-weight:800;margin:0 0 14px;letter-spacing:-.3px}
