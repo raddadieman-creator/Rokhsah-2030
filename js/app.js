@@ -192,35 +192,64 @@
     return '<div class="ready-row"><div class="lbl">' + esc(label) + "<small>" + esc(sub) + "</small></div>" +
       (att ? '<div><div class="val">' + toAr(att.pct) + "٪</div>" + bubbles(att.pct) + "</div>" : '<div class="val none">لم يُختبر بعد</div>') + "</div>";
   }
+  function levelOf(p) {
+    if (p == null) return null;
+    if (p >= 80) return { k: 3, name: "معلم خبير", note: "بحسب المؤهل وسنوات الخبرة" };
+    if (p >= 70) return { k: 2, name: "معلم متقدم", note: "بحسب المؤهل وسنوات الخبرة" };
+    if (p >= 50) return { k: 1, name: "معلم ممارس", note: "الحد الأدنى للرخصة" };
+    return { k: 0, name: "دون حد الرخصة", note: "المطلوب ٥٠ في كل اختبار" };
+  }
   function viewHome() {
     const live = store.get(K.live, null);
     const mySpec = user && SPEC_INDEX[user.spec];
     const g = lastScore("gen"), s = mySpec ? lastScore(mySpec.id) : null;
-    let html = '<section class="hero"><div class="hero-main">' +
-      (C.LOGO_URL ? '<img class="hero-logo" src="' + esc(/^(https?:|data:)/.test(C.LOGO_URL) ? C.LOGO_URL : BASE + C.LOGO_URL) + '" alt="' + esc(C.ORG_NAME || "") + '">' : "") +
-      '<h1 class="hero-name">' + esc(C.PLATFORM_NAME) + "</h1>" +
-      '<p class="hero-sub">منصة اختبارات الرخصة المهنية للمعلمين</p>' +
-      (C.ORG_NAME ? '<p class="hero-org">' + esc(C.ORG_NAME) + "</p>" : "") +
-      '<p class="lead">اختبارات تدريبية على نمط الاختبار التربوي العام واختبارات التخصص، بزمن محدد وتنقل حر بين الأسئلة، يعقبها تقرير مفصل للأداء في كل معيار وتفسير علمي لكل إجابة.</p>' +
-      '<div class="hero-actions">' +
-      (live ? '<button class="btn mark" data-go="exam">استكمال الاختبار المفتوح</button>' : "") +
-      '<button class="btn" data-go="setup/gen">ابدأ التربوي العام</button>' +
-      (mySpec ? '<button class="btn ghost" data-go="setup/' + mySpec.id + '">اختبار ' + esc(mySpec.name) + "</button>" : '<a class="btn ghost" href="#specs">اختيار تخصص</a>') +
-      "</div></div>" +
-      '<div class="hero-side"><section class="about" aria-labelledby="aboutH"><h2 id="aboutH">عن اختبار الرخصة المهنية</h2><dl>' +
-      "<div><dt>الاختبار التربوي العام</dt><dd>مشترك بين جميع المعلمين، ويقيس ثلاثة مجالات: القيم والمسؤوليات المهنية، والمعرفة المهنية، والممارسة المهنية.</dd></div>" +
-      "<div><dt>الاختبار التخصصي</dt><dd>يقيس مفاهيم التخصص وبنيته، ولكل تخصص اختبار مستقل.</dd></div>" +
-      "<div><dt>الدرجة المطلوبة</dt><dd>لا تُمنح الرخصة بأقل من ٥٠ في كل اختبار، ويتحدد مستواها بالدرجة الأدنى من الاختبارين مع المؤهل وسنوات الخبرة.</dd></div>" +
-      "<div><dt>في المنصة</dt><dd>" + toAr(93) + " سؤالًا في التربوي العام، و" + toAr(Object.keys(SPEC_INDEX).length) + " تخصصًا، وتفسير لكل إجابة.</dd></div>" +
-      "</dl></section>" +
-      '<aside class="ready" aria-label="بطاقة الجاهزية"><h2>بطاقة جاهزيتك</h2><p class="who">' +
-      (user ? esc(user.name) + (mySpec ? " — " + esc(mySpec.name) : "") : "سجّل بياناتك لتظهر نتائجك هنا") + "</p>" +
-      readyRow("التربوي العام", "آخر اختبار", g) +
-      readyRow(mySpec ? mySpec.name : "اختبار التخصص", mySpec ? "آخر اختبار" : "لم يُحدَّد التخصص", s) +
-      "</aside></div></section>";
+    const minP = g && s ? Math.min(g.pct, s.pct) : null;
+    const lv = levelOf(minP);
+    const nSpecs = Object.keys(SPEC_INDEX).length;
+    const logo = C.LOGO_URL ? '<img class="hero-logo" src="' + esc(/^(https?:|data:)/.test(C.LOGO_URL) ? C.LOGO_URL : BASE + C.LOGO_URL) + '" alt="' + esc(C.ORG_NAME || "") + '">' : "";
+    const scoreCell = (lbl, att) => '<div class="lc-score"><span>' + esc(lbl) + "</span><b>" + (att ? toAr(att.pct) + "٪" : "—") + "</b></div>";
 
-    html += '<section class="general" style="margin-top:20px"><div><h3>' + esc(G.name) + '</h3><p style="margin:0 0 8px;opacity:.8;font-size:13.5px">يشترك فيه جميع المعلمين، ويغطي ثلاثة مجالات:</p><ul>' + G.domains.map(d => "<li>" + esc(d.name) + "</li>").join("") +
-      '</ul></div><div class="acts"><button class="btn mark" data-go="setup/gen">ابدأ</button></div></section>';
+    let html = '<section class="stage"><div class="stage-in">' +
+      '<div class="stage-main">' + logo +
+      '<h1 class="hero-name">' + esc(C.PLATFORM_NAME) + "</h1>" +
+      '<p class="hero-sub">استعد لاختبارات الرخصة المهنية للمعلمين</p>' +
+      (C.ORG_NAME ? '<p class="hero-org">' + esc(C.ORG_NAME) + "</p>" : "") +
+      '<p class="lead">اختبار تربوي عام موزون على مجالات الهيئة ومعاييرها، واختبارات تخصص، وتقرير يبيّن أداءك في كل معيار مع تفسير لكل إجابة.</p>' +
+      '<div class="hero-actions">' +
+      (live ? '<button class="btn mark" data-go="exam">استكمال الاختبار المفتوح</button>' : '<button class="btn mark" data-go="setup/gen">ابدأ التربوي العام</button>') +
+      (mySpec ? '<button class="btn ghost" data-go="setup/' + mySpec.id + '">اختبار ' + esc(mySpec.name) + "</button>" : '<a class="btn ghost" href="#specs">اختر تخصصك</a>') +
+      "</div></div>" +
+      '<div class="lcard-wrap"><article class="lcard" aria-label="بطاقة الرخصة المتوقعة">' +
+      '<header><span class="lc-kicker">الرخصة المهنية للوظائف التعليمية</span><span class="lc-chip">' + (lv ? "تقدير من نتائجك" : "نموذج") + "</span></header>" +
+      '<div class="lc-name">' + (user ? esc(user.name) : "اسمك يظهر هنا") + "</div>" +
+      '<div class="lc-spec">' + (mySpec ? esc(mySpec.name) : "سجّل لتحديد تخصصك") + "</div>" +
+      '<div class="lc-scores">' + scoreCell("التربوي العام", g) + scoreCell("التخصص", s) + "</div>" +
+      '<div class="lc-level lv' + (lv ? lv.k : "x") + '"><small>المستوى المتوقع</small><b>' + (lv ? esc(lv.name) : "أكمل الاختبارين") + "</b>" + (lv ? "<em>" + esc(lv.note) + "</em>" : "<em>يُحسب من الدرجة الأدنى في الاختبارين</em>") + "</div>" +
+      '<div class="lc-steps" aria-hidden="true">' + [1, 2, 3].map(k => "<i" + (lv && lv.k >= k ? ' class="on"' : "") + "></i>").join("") + "</div>" +
+      "</article></div></div></section>";
+
+    html += '<section class="facts" aria-label="المنصة بالأرقام">' +
+      [[toAr(212), "سؤالًا في التربوي العام"], [toAr(30), "معيارًا فرعيًا تغطيها الأسئلة"], [toAr(nSpecs), "تخصصًا للمرحلتين"], [toAr(C.GENERAL_SIM_COUNT || 60), "سؤالًا في الاختبار الكامل"]]
+        .map(([n, t]) => "<div><b>" + n + "</b><span>" + t + "</span></div>").join("") + "</section>";
+
+    html += '<section class="duo">' +
+      '<div class="panel weights"><h2>مجالات الاختبار التربوي العام</h2><p class="panel-sub">الوزن النسبي لكل مجال كما في دليل المتقدم</p>' +
+      [["القيم والمسؤوليات المهنية", 21, 3], ["المعرفة المهنية", 40, 3], ["الممارسة المهنية", 39, 3]].map(([n, w, k]) =>
+        '<div class="wrow"><div class="wlbl"><span>' + n + "</span><b>" + toAr(w) + '٪</b></div><div class="wbar"><i style="--w:' + (w / 40 * 100) + '%"></i></div><small>' + toAr(k) + " معايير</small></div>").join("") +
+      '<button class="btn" data-go="setup/gen">ابدأ</button></div>' +
+      '<div class="panel ladder"><h2>مستويات الرخصة</h2><p class="panel-sub">الدرجة المطلوبة في كلا الاختبارين، العام والتخصصي</p><ol>' +
+      '<li class="l1"><b>معلم ممارس</b><span>٥٠ – ٦٩</span></li>' +
+      '<li class="l2"><b>معلم متقدم</b><span>٧٠ – ٧٩</span></li>' +
+      '<li class="l3"><b>معلم خبير</b><span>٨٠ فأعلى</span></li></ol>' +
+      '<p class="fine">المستويان المتقدم والخبير مشروطان بالمؤهل وسنوات الخبرة، وفق ضوابط الرخص المهنية الصادرة عن هيئة تقويم التعليم والتدريب.</p></div>' +
+      "</section>";
+
+    html += '<section class="quick" id="quick" aria-live="polite"><div class="quick-h"><h2>سؤال سريع</h2><button class="link" id="quickNext" hidden>سؤال آخر</button></div><div id="quickBody"><p class="muted">يجري تحميل السؤال…</p></div></section>';
+
+    html += '<section class="how"><h2>كيف تستعد؟</h2><ol>' +
+      "<li><b>سجّل بياناتك</b><span>الاسم الثلاثي والمرحلة والتخصص، مرة واحدة.</span></li>" +
+      "<li><b>اختر الاختبار</b><span>اختبار كامل بزمن محدد، أو تدريب بلا وقت يظهر فيه التفسير بعد كل إجابة.</span></li>" +
+      "<li><b>اقرأ تقريرك</b><span>نسبة إتقانك في كل معيار، وتفسير لكل سؤال أخطأت فيه.</span></li></ol></section>";
 
     html += '<div class="section-h" id="specs"><h2>اختبارات التخصص</h2><p>' + toAr(Object.keys(SPEC_INDEX).length) + ' تخصصًا</p></div>' +
       '<div class="spec-tools"><input id="specSearch" type="search" placeholder="ابحث عن تخصصك" aria-label="البحث في التخصصات"></div><div id="specGroups">' +
@@ -233,6 +262,27 @@
       main.querySelectorAll(".spec-list li").forEach(li => { li.hidden = q && !li.dataset.name.includes(q); });
       main.querySelectorAll(".spec-group").forEach(g => { g.hidden = !g.querySelector("li:not([hidden])"); });
     });
+    quickQuestion();
+  }
+  let quickPool = null;
+  async function quickQuestion() {
+    const body = $("#quickBody"), next = $("#quickNext");
+    if (!body) return;
+    try { if (!quickPool) quickPool = await getQuestions("gen"); } catch (e) { $("#quick").hidden = true; return; }
+    if (!quickPool || !quickPool.length || !$("#quickBody")) return;
+    const q = quickPool[Math.floor(Math.random() * quickPool.length)];
+    const sub = q.sub && G.subs ? G.subs[q.sub] : "";
+    body.innerHTML = (sub ? '<p class="quick-tag">' + esc(q.sub) + " · " + esc(sub) + "</p>" : "") + '<p class="quick-q">' + esc(q.text) + '</p><div class="quick-opts">' +
+      q.opts.map((o, i) => '<button data-i="' + i + '">' + esc(o.t) + "</button>").join("") + '</div><p class="quick-e" hidden></p>';
+    next.hidden = true;
+    body.querySelectorAll(".quick-opts button").forEach(btn => btn.addEventListener("click", () => {
+      const i = +btn.dataset.i;
+      body.querySelectorAll(".quick-opts button").forEach((b, j) => { b.disabled = true; if (q.opts[j].c) b.classList.add("ok"); else if (j === i) b.classList.add("bad"); });
+      const e = body.querySelector(".quick-e"); e.hidden = false;
+      e.innerHTML = "<b>" + (q.opts[i].c ? "إجابة صحيحة." : "الإجابة غير صحيحة.") + "</b> " + esc(q.e);
+      next.hidden = false;
+    }));
+    next.onclick = quickQuestion;
   }
 
   /* ---------- التسجيل والملف ---------- */
