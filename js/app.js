@@ -104,7 +104,7 @@
       if (typeof ax === "string") { const k = info.axes.indexOf(ax); ax = k; }
       if (typeof ax !== "number" || ax < 0 || ax >= info.axes.length) ax = -1;
       const opts = shuffle([{ t: r[1], c: true }, { t: r[2], c: false }, { t: r[3], c: false }, { t: r[4], c: false }].filter(o => o.t !== "" && o.t != null));
-      return { id: id + "-" + i, text: r[0], opts, e: r[5] || "", ax };
+      return { id: id + "-" + i, text: r[0], opts, e: r[5] || "", ax, sub: r[7] || "" };
     });
   }
   let vaultKey = null;
