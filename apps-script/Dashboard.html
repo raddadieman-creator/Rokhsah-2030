@@ -75,6 +75,7 @@ td.n{font-weight:800;font-variant-numeric:tabular-nums}
 .loading{padding:50px;text-align:center;color:var(--muted)}
 a.wa{color:var(--ok);font-weight:700;text-decoration:none}
 @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.form{grid-template-columns:1fr}}
+.iopts{display:grid;gap:3px;margin-top:6px}.io{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);border-bottom:1px dashed var(--rule);padding:2px 0}.io.ok{color:var(--ok);font-weight:700}.io b{font-variant-numeric:tabular-nums}
 @media(max-width:520px){.kpi b{font-size:26px}.tabs{display:flex;overflow-x:auto}}
 </style>
 </head>
@@ -91,11 +92,13 @@ a.wa{color:var(--ok);font-weight:700;text-decoration:none}
     <button role="tab" aria-selected="true" data-tab="overview">نظرة عامة</button>
     <button role="tab" aria-selected="false" data-tab="results">النتائج</button>
     <button role="tab" aria-selected="false" data-tab="people">المتدربون</button>
+    <button role="tab" aria-selected="false" data-tab="items">تحليل الفقرات</button>
     <button role="tab" aria-selected="false" data-tab="questions">إضافة أسئلة</button>
   </div>
   <section id="overview"><p class="loading">جارٍ تحميل البيانات…</p></section>
   <section id="results" hidden></section>
   <section id="people" hidden></section>
+  <section id="items" hidden></section>
   <section id="questions" hidden></section>
 </main>
 <script>
@@ -113,6 +116,17 @@ const GENERAL = {
     { name: "الممارسة المهنية", standards: [7, 8, 9] }
   ],
   weights: [8, 5, 8, 17, 15, 0, 8, 15, 11, 13],
+  subs: {
+    "1.1": "الالتزام بالقيم الإسلامية الوسطية", "1.2": "تعزيز الهوية الوطنية والتنوع الثقافي", "1.3": "الالتزام بالأخلاق المهنية والسياسات واللوائح التعليمية",
+    "2.1": "وضع خطة لتطوير الأداء المهني في ضوء المعايير المهنية", "2.2": "تطوير الأداء المهني في ضوء المعايير المهنية",
+    "3.1": "التفاعل مع مجتمعات التعلم المهني", "3.2": "التفاعل مع أولياء الأمور", "3.3": "التفاعل مع المجتمع المحلي",
+    "4.1": "استيعاب النص المسموع والمقروء", "4.2": "التعبير الكتابي الصحيح ومراعاة الكتابة الإملائية السليمة", "4.3": "التحدث والقراءة بلغة صحيحة وسليمة", "4.4": "بنية الأعداد والعمليات الحسابية ومفاهيم القياس وأساليبه", "4.5": "جمع البيانات وتحليلها وتفسيرها",
+    "5.1": "خصائص النمو وأثرها في التعلم", "5.2": "الفروق الفردية وأثرها في التعلم", "5.3": "كيفية تعلم المتعلمين", "5.4": "خصائص ذوي الاحتياجات الخاصة",
+    "7.1": "المداخل العامة للتدريس", "7.2": "طرق التدريس العامة",
+    "8.1": "التخطيط للتدريس", "8.2": "تصميم برامج تعلم وفق خطة التدريس", "8.3": "التنوع في استخدام استراتيجيات التدريس", "8.4": "تنمية الأبعاد المشتركة في المناهج",
+    "9.1": "تأسيس توقعات أداء عالية للمتعلمين", "9.2": "قيادة الأنشطة الصفية بفاعلية", "9.3": "تهيئة بيئات تعلم آمنة وجاذبة", "9.4": "بناء ثقافة تواصل معززة للتعلم",
+    "10.1": "التخطيط للتقويم وإعداد أدواته", "10.2": "تطبيق التقويم", "10.3": "توظيف نتائج التقويم لتحسين التعلم"
+  },
   standards: [
     "الالتزام بالقيم الإسلامية الوسطية وأخلاقيات المهنة وتعزيز الهوية الوطنية",
     "التطوير المهني المستمر",
@@ -137,11 +151,13 @@ const SPECS = [
   ]},
   { group: "الرياضيات والعلوم", file: "math-science", items: [
     { id: "math1", name: "الرياضيات 1", stage: "ابتدائي", axes: ["الأعداد والعمليات", "الهندسة والقياس", "الجبر والأنماط", "طرق التدريس"] },
-    { id: "math2", name: "الرياضيات 2", stage: "متوسط وثانوي", axes: ["الجبر والدوال", "الهندسة والمثلثات", "التفاضل والتكامل", "الإحصاء والاحتمال"] },
-    { id: "sci", name: "العلوم", stage: "ابتدائي ومتوسط", axes: ["علوم الحياة", "العلوم الفيزيائية", "علوم الأرض والفضاء", "طرق التدريس"] },
-    { id: "phy", name: "الفيزياء", stage: "ثانوي", axes: ["الميكانيكا", "الكهرباء والمغناطيسية", "الموجات والضوء", "الحرارة والفيزياء الحديثة"] },
-    { id: "chem", name: "الكيمياء", stage: "ثانوي", axes: ["بنية المادة", "الحسابات الكيميائية", "التفاعلات والاتزان", "الكيمياء العضوية"] },
-    { id: "bio", name: "الأحياء", stage: "ثانوي", axes: ["الخلية والوراثة", "تنوع الكائنات", "أجهزة الجسم", "البيئة"] },
+    { id: "math2", name: "الرياضيات 2", stage: "متوسط وثانوي", axes: ["الأعداد والعمليات عليها", "الجبر والدوال الحقيقية والتحليل الرياضي", "الهندسة والقياس", "الإحصاء والاحتمالات", "طرق تدريس الرياضيات"] },
+    { id: "sci", name: "العلوم", stage: "ابتدائي ومتوسط", axes: ["تاريخ وطبيعة العلم وتكامل العلوم", "علم الأحياء", "علم الكيمياء", "علم الفيزياء", "علوم الأرض والفضاء", "تدريس العلوم"] },
+    { id: "phy", name: "الفيزياء", stage: "ثانوي", axes: ["طبيعة علم الفيزياء ومنهجه وعلاقته بالعلوم", "التجارب العملية والمهارات الرياضية", "الميكانيكا والموائع وخواص المادة", "الكهرباء والمغناطيسية", "الحرارة والديناميكا الحرارية", "الموجات والضوء", "الفيزياء الحديثة والنووية", "تدريس الفيزياء"] },
+    { id: "chem", name: "الكيمياء", stage: "ثانوي", official: true,
+      axes: ["طبيعة علم الكيمياء وتاريخه وتطبيقاته وعلاقته بالعلوم الأخرى", "التجارب العملية والمهارات الرياضية", "طبيعة المادة والجدول الدوري", "قوانين الغازات والحسابات الكيميائية والمحاليل", "الكيمياء الحركية والحرارية والكهربائية والاتزان", "الهيدروكربونات والمجموعات الوظيفية", "المهارات الأساسية وطرق تدريس الكيمياء"],
+      weights: [12, 6, 9, 28, 17, 18, 10] },
+    { id: "bio", name: "الأحياء", stage: "ثانوي", axes: ["الخلية والوراثة والتقنية الحيوية", "تنوع الكائنات وتصنيفها", "وظائف الأعضاء في الإنسان والنبات", "البيئة والتطور", "طبيعة علم الأحياء والسلامة المخبرية", "طرق تدريس الأحياء"] },
     { id: "earth", name: "علم الأرض", stage: "ثانوي", axes: ["المعادن والصخور", "العمليات الداخلية والخارجية", "الغلاف الجوي والمائي", "الفلك"] }
   ]},
   { group: "اللغة الإنجليزية والاجتماعيات", file: "english-social", items: [
@@ -190,8 +206,8 @@ const when=ts=>new Date(ts).toLocaleString('ar-SA-u-ca-gregory',{day:'numeric',m
 
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));
-  ['overview','results','people','questions'].forEach(id=>document.getElementById(id).hidden=id!==b.dataset.tab);
-  if(b.dataset.tab==='people')drawPeople(); if(b.dataset.tab==='questions')loadQuestions();
+  ['overview','results','people','items','questions'].forEach(id=>document.getElementById(id).hidden=id!==b.dataset.tab);
+  if(b.dataset.tab==='people')drawPeople(); if(b.dataset.tab==='questions')loadQuestions(); if(b.dataset.tab==='items')drawItemsShell();
 });
 run('getMeta').then(m=>{
   if(m.accent){document.documentElement.style.setProperty('--accent',m.accent);document.documentElement.style.setProperty('--accent-soft',m.accent+'38');}
@@ -286,6 +302,41 @@ function drawPeople(){
 }
 
 /* ---------- الأسئلة المضافة ---------- */
+/* ---------- تحليل الفقرات ---------- */
+function drawItemsShell(){
+  const el=document.getElementById('items');
+  if(el.dataset.ready)return; el.dataset.ready=1;
+  const used=[...new Set(RES.filter(isFull).map(r=>r.bank))];
+  el.innerHTML='<div class="filters"><label>الاختبار<select id="iBank">'+(used.length?used:['gen']).map(b=>'<option value="'+esc(b)+'">'+esc((BANK[b]||{}).name||b)+'</option>').join('')+'</select></label>'+
+    '<label>عرض<select id="iShow"><option value="flag">الأسئلة التي تحتاج مراجعة</option><option value="all">كل الأسئلة</option></select></label></div>'+
+    '<div class="card" style="font-size:13px;line-height:1.9"><b>طريقة القراءة:</b> السهولة نسبة من أجابوا إجابة صحيحة، والمقبول غالبًا بين ٠٫٣٠ و٠٫٩٠. '+
+    'التمييز ارتباط السؤال بدرجة المتدرب في بقية الأسئلة: ٠٫٤٠ فأعلى جيد جدًا، و٠٫٣٠–٠٫٣٩ جيد، و٠٫٢٠–٠٫٢٩ يحتاج تحسينًا، وأقل من ٠٫٢٠ ضعيف، والسالب يدل غالبًا على خطأ في السؤال أو مفتاحه. '+
+    'البديل الذي يختاره أقل من ٥٪ لا يؤدي وظيفته. تُحسب الأرقام من الاختبارات الكاملة فقط، ولا يُعتد بها قبل ٣٠ محاولة تقريبًا.</div><div id="iBody"></div>';
+  document.getElementById('iBank').onchange=loadItems; document.getElementById('iShow').onchange=drawItems; loadItems();
+}
+let IST=null;
+function loadItems(){
+  const b=document.getElementById('iBank').value, body=document.getElementById('iBody');
+  body.innerHTML='<p class="loading">جارٍ الحساب…</p>';
+  run('getItemStats',b).then(r=>{IST=r;drawItems();}).catch(e=>body.innerHTML='<p class="empty">'+esc(e.message)+'</p>');
+}
+function drawItems(){
+  const body=document.getElementById('iBody'), show=document.getElementById('iShow').value;
+  if(!IST||!IST.n){body.innerHTML='<p class="empty">لا توجد بعد اختبارات كاملة مسجلة بإجاباتها التفصيلية في هذا الاختبار.</p>';return;}
+  const f2=v=>v==null?'—':ar(v.toFixed(2));
+  const flags=it=>{const f=[];if(it.n>=5){if(it.p>0.9)f.push('سهل جدًا');if(it.p<0.3)f.push('صعب جدًا');if(it.rpb!=null&&it.rpb<0.2)f.push(it.rpb<0?'تمييز سالب':'تمييز ضعيف');
+    [1,2,3].forEach(k=>{if(it.opts[k]&&it.dist[k]/it.n<0.05)f.push('البديل '+ar(k)+' لا يجذب أحدًا');});}return f;};
+  const list=IST.items.filter(it=>show==='all'||flags(it).length);
+  const opt=(it,k)=>{const t=it.opts[k];if(!t&&k)return '';const pct=it.n?Math.round(100*it.dist[k]/it.n):0;
+    return '<div class="io'+(k===0?' ok':'')+'"><span>'+(k===0?'✓ ':'')+esc(t||'')+'</span><b>'+ar(pct)+'٪</b></div>';};
+  body.innerHTML='<p class="muted">عدد الاختبارات الكاملة المحللة: <b>'+ar(IST.n)+'</b> — الأسئلة المعروضة: '+ar(list.length)+' من '+ar(IST.items.length)+'</p>'+
+    (list.length?'<div class="tbl-wrap"><table><thead><tr><th>السؤال وتوزيع الإجابات</th><th>المجيبون</th><th>السهولة</th><th>التمييز</th><th>ملاحظات</th></tr></thead><tbody>'+
+    list.map(it=>{const f=flags(it);return '<tr><td style="min-width:320px">'+esc(it.q||it.id)+'<div class="iopts">'+[0,1,2,3].map(k=>opt(it,k)).join('')+
+      (it.dist[4]?'<div class="io"><span>لم يُجب</span><b>'+ar(Math.round(100*it.dist[4]/it.n))+'٪</b></div>':'')+'</div></td><td class="n">'+ar(it.n)+'</td><td class="n">'+f2(it.p)+'</td><td class="n">'+f2(it.rpb)+
+      '</td><td>'+(f.length?f.map(x=>'<span class="pill p0" style="display:inline-block;margin:2px">'+esc(x)+'</span>').join(''):'<span class="pill p3">جيد</span>')+'</td></tr>';}).join('')+'</tbody></table></div>'
+    :'<p class="empty">لا توجد أسئلة تحتاج مراجعة وفق المؤشرات الحالية.</p>');
+}
+
 function loadQuestions(){
   const el=document.getElementById('questions');
   el.innerHTML='<p class="loading">جارٍ التحميل…</p>';

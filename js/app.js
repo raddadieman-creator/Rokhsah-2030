@@ -98,13 +98,15 @@
     } catch (e) { return []; }
   }
   function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  /* معرّف ثابت للسؤال من نصه، يبقى كما هو مهما تغير ترتيب البنك */
+  function qhash(t) { let h = 5381; t = String(t); for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
   function normalize(id, raw, info) {
     return raw.map((r, i) => {
       let ax = r[6];
       if (typeof ax === "string") { const k = info.axes.indexOf(ax); ax = k; }
       if (typeof ax !== "number" || ax < 0 || ax >= info.axes.length) ax = -1;
-      const opts = shuffle([{ t: r[1], c: true }, { t: r[2], c: false }, { t: r[3], c: false }, { t: r[4], c: false }].filter(o => o.t !== "" && o.t != null));
-      return { id: id + "-" + i, text: r[0], opts, e: r[5] || "", ax, sub: r[7] || "" };
+      const opts = shuffle([{ t: r[1], c: true, o: 0 }, { t: r[2], c: false, o: 1 }, { t: r[3], c: false, o: 2 }, { t: r[4], c: false, o: 3 }].filter(o => o.t !== "" && o.t != null));
+      return { id: id + "_" + qhash(r[0]), text: r[0], opts, e: r[5] || "", ax, sub: r[7] || "", raw: [r[1], r[2], r[3], r[4]] };
     });
   }
   let vaultKey = null;
@@ -517,7 +519,10 @@
       total: att.total, correct: att.correct, pct: att.pct, answered: att.answered,
       minutes: Math.round(att.secs / 6) / 10, timeUp: att.timeUp,
       axes: att.axes.map(a => a.name + ": " + a.c + "/" + a.n).join(" | "),
-      wrong: att.qs.map((q, i) => (att.ans[i] === null || !q.opts[att.ans[i]].c) ? (i + 1) : null).filter(Boolean).join("، ")
+      wrong: att.qs.map((q, i) => (att.ans[i] === null || !q.opts[att.ans[i]].c) ? (i + 1) : null).filter(Boolean).join("، "),
+      /* إجابة كل سؤال لتحليل الفقرات: 0 الصحيحة، 1–3 البدائل بترتيبها الأصلي، −1 لم يُجب */
+      items: att.qs.map((q, i) => q.id + ":" + (att.ans[i] == null || !q.opts[att.ans[i]] ? -1 : (q.opts[att.ans[i]].o ?? -1))).join(";"),
+      meta: att.qs.map(q => [q.id, att.bank, q.ax, String(q.text).slice(0, 400)].concat((q.raw || []).map(x => String(x == null ? "" : x).slice(0, 200))))
     };
     fetch(C.SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
       .then(() => mark(att.id, true)).catch(() => mark(att.id, false));
