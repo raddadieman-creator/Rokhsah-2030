@@ -19,6 +19,11 @@
   let user = store.get(K.user, null);
 
   /* ---------- فهرس التخصصات ---------- */
+  if (Array.isArray(C.STAGES)) {
+    const ok = st => C.STAGES.some(x => st.includes(x)) || st === "جميع المراحل";
+    SPECS.forEach(g => { g.items = g.items.filter(s => ok(s.stage)); });
+    for (let i = SPECS.length - 1; i >= 0; i--) if (!SPECS[i].items.length) SPECS.splice(i, 1);
+  }
   const SPEC_INDEX = {};
   SPECS.forEach(g => g.items.forEach(s => { SPEC_INDEX[s.id] = Object.assign({ file: g.file, group: g.group }, s); }));
   function bankInfo(id) {
@@ -36,6 +41,9 @@
   if (C.ACCENT) {
     const r = document.documentElement.style;
     r.setProperty("--mark", C.ACCENT);
+    if (C.INK) r.setProperty("--ink", C.INK);
+    if (C.INK_2) r.setProperty("--ink-2", C.INK_2);
+    if (C.PAPER) r.setProperty("--paper", C.PAPER);
     if (C.ACCENT_SOFT) r.setProperty("--mark-soft", C.ACCENT_SOFT);
     if (C.ACCENT_TEXT) r.setProperty("--mark-text", C.ACCENT_TEXT);
   }
@@ -174,10 +182,11 @@
     const mySpec = user && SPEC_INDEX[user.spec];
     const g = lastScore("gen"), s = mySpec ? lastScore(mySpec.id) : null;
     let html = '<section class="hero"><div class="hero-main">' +
+      (C.LOGO_URL ? '<img class="hero-logo" src="' + esc(/^(https?:|data:)/.test(C.LOGO_URL) ? C.LOGO_URL : BASE + C.LOGO_URL) + '" alt="' + esc(C.ORG_NAME || "") + '">' : "") +
       '<h1 class="hero-name">' + esc(C.PLATFORM_NAME) + "</h1>" +
-      '<p class="hero-sub">تدرّب على اختبار الرخصة المهنية</p>' +
+      '<p class="hero-sub">منصة محاكاة اختبارات الرخصة المهنية للمعلمين</p>' +
       (C.ORG_NAME ? '<p class="hero-org">' + esc(C.ORG_NAME) + "</p>" : "") +
-      '<p class="lead">محاكاة للاختبار التربوي العام واختبارات التخصص، بمؤقت وتنقل بين الأسئلة كما في قاعة الاختبار، ثم تحليل لدرجتك في كل معيار وتفسير لكل إجابة.</p>' +
+      '<p class="lead">اختبارات محاكية للاختبار التربوي العام واختبارات التخصص، بزمن محدد وتنقل حر بين الأسئلة، يعقبها تقرير مفصل للأداء في كل معيار وتفسير علمي لكل إجابة.</p>' +
       '<div class="hero-actions">' +
       (live ? '<button class="btn mark" data-go="exam">استكمال الاختبار المفتوح</button>' : "") +
       '<button class="btn" data-go="setup/gen">ابدأ التربوي العام</button>' +
@@ -222,7 +231,7 @@
       '<p class="page-sub">' + (isNew ? "تُحفظ مع نتائجك ليتابعها فريق المنصة." : "عدّل بياناتك، وتُرسل مع نتائجك القادمة.") + "</p>" +
       '<form id="pf" novalidate>' +
       '<label class="field"><span>الاسم الثلاثي</span><input name="name" autocomplete="name" required value="' + esc(user ? user.name : "") + '"></label>' +
-      '<label class="field"><span>المرحلة</span><select name="stage" required><option value="">اختر المرحلة</option>' + ["ابتدائي", "متوسط", "ثانوي"].map(o => "<option" + (user && user.stage === o ? " selected" : "") + ">" + o + "</option>").join("") + "</select></label>" +
+      '<label class="field"><span>المرحلة</span><select name="stage" required><option value="">اختر المرحلة</option>' + (C.STAGES || ["ابتدائي", "متوسط", "ثانوي"]).map(o => "<option" + (user && user.stage === o ? " selected" : "") + ">" + o + "</option>").join("") + "</select></label>" +
       '<label class="field"><span>التخصص</span><select name="spec" required>' + specOptions(user && user.spec) + "</select></label>" +
       '<p class="err" id="pfErr" role="alert"></p>' +
       '<button class="btn" type="submit" style="width:100%">' + (isNew ? "حفظ والمتابعة" : "حفظ التعديلات") + "</button></form></div></div>";
